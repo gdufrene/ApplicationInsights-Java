@@ -1,16 +1,19 @@
 package com.microsoft.applicationinsights.internal.config.connection;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.microsoft.applicationinsights.internal.config.connection.ConnectionString.Defaults;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import com.microsoft.applicationinsights.internal.config.connection.ConnectionString.Defaults;
+
 public class EndpointProvider {
-    @VisibleForTesting static final String INGESTION_URI_PATH = "v2/track";
-    @VisibleForTesting static final String LIVE_URI_PATH = "QuickPulseService.svc";
-    @VisibleForTesting static final String API_PROFILES_APP_ID_URI_PREFIX = "api/profiles/"; // <base uri, with host>/api/profiles/<ikey>/appid
-    @VisibleForTesting static final String API_PROFILES_APP_ID_URI_SUFFIX = "/appId";
+    //@VisibleForTesting 
+    static final String INGESTION_URI_PATH = "v2/track";
+    //@VisibleForTesting 
+    static final String LIVE_URI_PATH = "QuickPulseService.svc";
+    //@VisibleForTesting 
+    static final String API_PROFILES_APP_ID_URI_PREFIX = "api/profiles/"; // <base uri, with host>/api/profiles/<ikey>/appid
+    //@VisibleForTesting 
+    static final String API_PROFILES_APP_ID_URI_SUFFIX = "/appId";
 
     private volatile URI ingestionEndpoint;
     private volatile URI ingestionEndpointURL;

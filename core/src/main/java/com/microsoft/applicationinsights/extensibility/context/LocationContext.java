@@ -25,9 +25,9 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.microsoft.applicationinsights.internal.util.MapUtil;
+import org.apache.commons.lang3.StringUtils;
 
-import com.google.common.base.Strings;
+import com.microsoft.applicationinsights.internal.util.MapUtil;
 
 public final class LocationContext {
     private static final String PATTERN =
@@ -44,7 +44,7 @@ public final class LocationContext {
     }
 
     public void setIp(String value) {
-        if (!Strings.isNullOrEmpty(value) && isIPV4(value)) {
+        if (!StringUtils.isEmpty(value) && isIPV4(value)) {
             MapUtil.setStringValueOrRemove(tags, ContextTagKeys.getKeys().getLocationIP(), value);
         }
     }

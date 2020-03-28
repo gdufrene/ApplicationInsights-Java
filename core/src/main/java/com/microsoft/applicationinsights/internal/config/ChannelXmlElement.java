@@ -24,39 +24,44 @@ package com.microsoft.applicationinsights.internal.config;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.google.common.base.Strings;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+
+import org.apache.commons.lang3.StringUtils;
+
 import com.microsoft.applicationinsights.TelemetryConfiguration;
 import com.microsoft.applicationinsights.internal.config.connection.EndpointProvider;
-import com.thoughtworks.xstream.annotations.XStreamAlias;
-import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
 /**
  * Created by gupele on 3/15/2015.
  */
+@XmlAccessorType(XmlAccessType.FIELD)
 public class ChannelXmlElement {
 
-    @XStreamAlias("EndpointAddress")
+    @XmlElement(name="EndpointAddress")
     private String endpointAddress;
 
-    @XStreamAlias("MaxTelemetryBufferCapacity")
+    @XmlElement(name="MaxTelemetryBufferCapacity")
     private String maxTelemetryBufferCapacity;
 
-    @XStreamAlias("FlushIntervalInSeconds")
+    @XmlElement(name="FlushIntervalInSeconds")
     private String flushIntervalInSeconds;
 
-    @XStreamAlias("DeveloperMode")
+    @XmlElement(name="DeveloperMode")
     private boolean developerMode;
 
-    @XStreamAlias("Throttling")
+    @XmlElement(name="Throttling")
     private boolean throttling = true;
 
-    @XStreamAlias("MaxTransmissionStorageFilesCapacityInMB")
+    @XmlElement(name="MaxTransmissionStorageFilesCapacityInMB")
     private String maxTransmissionStorageFilesCapacityInMB;
 
-    @XStreamAlias("MaxInstantRetry")
+    @XmlElement(name="MaxInstantRetry")
     private String maxInstantRetry;
 
-    @XStreamAsAttribute
+    @XmlAttribute
     private String type = "com.microsoft.applicationinsights.channel.concrete.inprocess.InProcessTelemetryChannel";
 
     public String getType() {
@@ -145,24 +150,24 @@ public class ChannelXmlElement {
             data.put("DeveloperMode", "true");
         }
 
-        if (!Strings.isNullOrEmpty(endpointAddress)) {
+        if (!StringUtils.isEmpty(endpointAddress)) {
             data.put("EndpointAddress", endpointAddress);
         }
 
 
-        if (!Strings.isNullOrEmpty(maxTelemetryBufferCapacity)) {
+        if (!StringUtils.isEmpty(maxTelemetryBufferCapacity)) {
             data.put("MaxTelemetryBufferCapacity", maxTelemetryBufferCapacity);
         }
 
-        if (!Strings.isNullOrEmpty(flushIntervalInSeconds)) {
+        if (!StringUtils.isEmpty(flushIntervalInSeconds)) {
             data.put("FlushIntervalInSeconds", flushIntervalInSeconds);
         }
 
-        if (!Strings.isNullOrEmpty(maxTransmissionStorageFilesCapacityInMB)) {
+        if (!StringUtils.isEmpty(maxTransmissionStorageFilesCapacityInMB)) {
             data.put("MaxTransmissionStorageFilesCapacityInMB", maxTransmissionStorageFilesCapacityInMB);
         }
 
-        if (!Strings.isNullOrEmpty(maxInstantRetry)) {
+        if (!StringUtils.isEmpty(maxInstantRetry)) {
             data.put("MaxInstantRetry", maxInstantRetry);
         }
 

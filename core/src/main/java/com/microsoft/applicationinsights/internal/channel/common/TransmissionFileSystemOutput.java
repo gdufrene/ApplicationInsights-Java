@@ -21,40 +21,35 @@
 
 package com.microsoft.applicationinsights.internal.channel.common;
 
-import java.io.File;
-import java.io.InputStream;
-import java.io.ObjectInput;
-import java.io.FileInputStream;
 import java.io.BufferedInputStream;
-import java.io.ObjectInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
 import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
-
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import com.microsoft.applicationinsights.internal.channel.TransmissionOutput;
-import com.microsoft.applicationinsights.internal.logger.InternalLogger;
-
-import com.microsoft.applicationinsights.internal.util.LimitsEnforcer;
-import com.microsoft.applicationinsights.internal.util.LocalFileSystemUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+
+import com.microsoft.applicationinsights.internal.channel.TransmissionOutput;
+import com.microsoft.applicationinsights.internal.logger.InternalLogger;
+import com.microsoft.applicationinsights.internal.util.LimitsEnforcer;
+import com.microsoft.applicationinsights.internal.util.LocalFileSystemUtils;
 
 /**
  * The class knows how to manage {@link Transmission} that needs
@@ -218,7 +213,7 @@ public final class TransmissionFileSystemOutput implements TransmissionOutput {
     private List<File> sortOldestLastAndTrim(Collection<File> transmissions, int limit) {
         List<File> asList;
         if (!(transmissions instanceof List)) {
-            asList = Lists.newArrayList(transmissions);
+            asList = new ArrayList<>(transmissions);
         } else {
             asList = (List<File>)transmissions;
         }
@@ -226,6 +221,8 @@ public final class TransmissionFileSystemOutput implements TransmissionOutput {
         Collections.sort(asList, new Comparator<File>() {
             @Override
             public int compare(File file1, File file2) {
+            	return file2.getName().compareTo(file1.getName());
+            	/*
                 long file1LastModified = file1.lastModified();
                 long file2LastModified = file2.lastModified();
                 if (file1LastModified < file2LastModified) {
@@ -235,6 +232,7 @@ public final class TransmissionFileSystemOutput implements TransmissionOutput {
                 }
 
                 return 0;
+            	 */
             }
         });
 
@@ -245,12 +243,11 @@ public final class TransmissionFileSystemOutput implements TransmissionOutput {
         return asList;
     }
 
-    @SuppressWarnings("lgtm[java/input-resource-leak]") // All the streams close their delegates.
     private Optional<Transmission> loadTransmission(File file) {
         Transmission transmission = null;
 
         if (file == null) {
-            return Optional.absent();
+            return Optional.empty();
         }
         try (ObjectInput input = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)))) {
             transmission = (Transmission)input.readObject();
@@ -262,7 +259,7 @@ public final class TransmissionFileSystemOutput implements TransmissionOutput {
             InternalLogger.INSTANCE.error("Failed to load transmission, io exception: %s", e.toString());
         }
 
-        return Optional.fromNullable(transmission);
+        return Optional.ofNullable(transmission);
     }
 
     private boolean renameToPermanentName(File tempTransmissionFile) {
@@ -291,10 +288,9 @@ public final class TransmissionFileSystemOutput implements TransmissionOutput {
             // Consume the exception, since there isn't anything 'smart' to do now
         }
 
-        return Optional.fromNullable(transmissionFile);
+        return Optional.ofNullable(transmissionFile);
     }
 
-    @SuppressWarnings("lgtm[java/input-resource-leak]") // All the streams close their delegates.
     private boolean saveTransmission(File transmissionFile, Transmission transmission) {
         try (ObjectOutput output = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(transmissionFile)))) {
             output.writeObject(transmission);
@@ -309,12 +305,14 @@ public final class TransmissionFileSystemOutput implements TransmissionOutput {
     private Optional<File> createTemporaryFile() {
         File file = null;
         try {
-            file = File.createTempFile(TRANSMISSION_FILE_PREFIX, null, folder);
+        	// This allow to sort files with creation date (not modified date ...)
+        	String prefix = TRANSMISSION_FILE_PREFIX + System.currentTimeMillis() + "-";
+            file = File.createTempFile(prefix, null, folder);
         } catch (IOException e) {
             InternalLogger.INSTANCE.error("Failed to create temporary file, exception: %s", e.toString());
         }
 
-        return Optional.fromNullable(file);
+        return Optional.ofNullable(file);
     }
 
     private long getTotalSizeOfTransmissionFiles() {
@@ -337,13 +335,13 @@ public final class TransmissionFileSystemOutput implements TransmissionOutput {
 
                 if (transmissions.isEmpty()) {
                     // No files
-                    return Optional.absent();
+                    return Optional.empty();
                 }
 
                 List<File> filesToLoad = sortOldestLastAndTrim(transmissions, NUMBER_OF_FILES_TO_CACHE);
 
                 if (filesToLoad == null || filesToLoad.isEmpty()) {
-                    return Optional.absent();
+                    return Optional.empty();
                 }
 
                 cacheOfOldestFiles.addAll(filesToLoad);
@@ -353,12 +351,12 @@ public final class TransmissionFileSystemOutput implements TransmissionOutput {
 
             String fileName = fileToLoad.getName();
             if (filesThatAreBeingLoaded.contains(fileName)) {
-                return Optional.absent();
+                return Optional.empty();
             }
 
             filesThatAreBeingLoaded.add(fileName);
             // Remove oldest which is the last one, this is optimized for not doing a copy
-            return Optional.fromNullable(fileToLoad);
+            return Optional.ofNullable(fileToLoad);
         }
     }
 }

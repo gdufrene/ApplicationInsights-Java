@@ -24,10 +24,10 @@ package com.microsoft.applicationinsights.internal.quickpulse;
 import java.io.IOException;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPost;
+import org.springframework.web.reactive.function.client.ClientRequest;
+import org.springframework.web.reactive.function.client.ClientResponse;
 
-import com.microsoft.applicationinsights.internal.channel.common.ApacheSender;
+import com.microsoft.applicationinsights.internal.channel.common.HttpSender;
 
 /**
  * Created by gupele on 12/12/2016.
@@ -35,14 +35,14 @@ import com.microsoft.applicationinsights.internal.channel.common.ApacheSender;
 final class DefaultQuickPulseDataSender implements QuickPulseDataSender {
 
     private final QuickPulseNetworkHelper networkHelper = new QuickPulseNetworkHelper();
-    private final ApacheSender apacheSender;
+    private final HttpSender apacheSender;
     private volatile QuickPulseStatus quickPulseStatus;
     private volatile boolean stopped = false;
     private long lastValidTransmission = 0;
 
-    private final ArrayBlockingQueue<HttpPost> sendQueue;
+    private final ArrayBlockingQueue<ClientRequest> sendQueue;
 
-    public DefaultQuickPulseDataSender(final ApacheSender apacheSender, final ArrayBlockingQueue<HttpPost> sendQueue) {
+    public DefaultQuickPulseDataSender(final HttpSender apacheSender, final ArrayBlockingQueue<ClientRequest> sendQueue) {
         this.apacheSender = apacheSender;
         this.sendQueue = sendQueue;
     }
@@ -51,13 +51,13 @@ final class DefaultQuickPulseDataSender implements QuickPulseDataSender {
     public void run() {
         try {
             while (!stopped) {
-                HttpPost post = sendQueue.take();
+            	ClientRequest post = sendQueue.take();
                 if (quickPulseStatus != QuickPulseStatus.QP_IS_ON) {
                     continue;
                 }
 
                 final long sendTime = System.nanoTime();
-                HttpResponse response = null;
+                ClientResponse response = null;
                 try {
                     response = apacheSender.sendPostRequest(post);
                     if (networkHelper.isSuccess(response)) {
@@ -79,10 +79,6 @@ final class DefaultQuickPulseDataSender implements QuickPulseDataSender {
                     }
                 } catch (IOException e) {
                     onPostError(sendTime);
-                } finally {
-                    if (response != null) {
-                        apacheSender.dispose(response);
-                    }
                 }
             }
         } catch (ThreadDeath td) {

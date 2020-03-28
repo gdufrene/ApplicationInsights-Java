@@ -23,11 +23,11 @@
 */
 package com.microsoft.applicationinsights.internal.schemav2;
 
-import com.google.common.base.Preconditions;
+import java.io.IOException;
+
+import com.microsoft.applicationinsights.common.Preconditions;
 import com.microsoft.applicationinsights.telemetry.JsonSerializable;
 import com.microsoft.applicationinsights.telemetry.JsonTelemetryDataSerializer;
-
-import java.io.IOException;
 
 /**
  * Data contract class Domain.

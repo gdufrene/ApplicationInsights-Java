@@ -21,41 +21,44 @@
 
 package com.microsoft.applicationinsights.internal.config;
 
-import com.thoughtworks.xstream.annotations.XStreamAlias;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 
 /**
  * Created by gupele on 11/14/2016.
  */
+@XmlAccessorType(XmlAccessType.FIELD)
 public class AdaptiveSamplerXmlElement {
 
-    @XStreamAlias("IncludeTypes")
+    @XmlElement(name="IncludeTypes")
     private String includeTypes;
 
-    @XStreamAlias("ExcludeTypes")
+    @XmlElement(name="ExcludeTypes")
     private String excludeTypes;
 
-    @XStreamAlias("MaxTelemetryItemsPerSecond")
+    @XmlElement(name="MaxTelemetryItemsPerSecond")
     private String maxTelemetryItemsPerSecond;
 
-    @XStreamAlias("EvaluationIntervalInSec")
+    @XmlElement(name="EvaluationIntervalInSec")
     private String evaluationInterval;
 
-    @XStreamAlias("SamplingPercentageDecreaseTimeoutInSec")
+    @XmlElement(name="SamplingPercentageDecreaseTimeoutInSec")
     private String samplingPercentageDecreaseTimeout;
 
-    @XStreamAlias("SamplingPercentageIncreaseTimeoutInSec")
+    @XmlElement(name="SamplingPercentageIncreaseTimeoutInSec")
     private String samplingPercentageIncreaseTimeout;
 
-    @XStreamAlias("MinSamplingPercentage")
+    @XmlElement(name="MinSamplingPercentage")
     private String minSamplingPercentage;
 
-    @XStreamAlias("MaxSamplingPercentage")
+    @XmlElement(name="MaxSamplingPercentage")
     private String maxSamplingPercentage;
 
-    @XStreamAlias("InitialSamplingPercentage")
+    @XmlElement(name="InitialSamplingPercentage")
     private String initialSamplingPercentage;
 
-    @XStreamAlias("MovingAverageRatio")
+    @XmlElement(name="MovingAverageRatio")
     private String movingAverageRatio;
 
     public void setMaxTelemetryItemsPerSecond(String maxTelemetryItemsPerSecond) {

@@ -21,36 +21,36 @@
 
 package com.microsoft.applicationinsights.internal.channel.common;
 
-import com.google.common.base.Preconditions;
+
+import java.net.URI;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.reactive.function.client.ClientResponse;
+import org.springframework.web.reactive.function.client.WebClient;
+
 import com.microsoft.applicationinsights.TelemetryConfiguration;
+import com.microsoft.applicationinsights.common.Preconditions;
 import com.microsoft.applicationinsights.internal.channel.TransmissionDispatcher;
 import com.microsoft.applicationinsights.internal.channel.TransmissionHandlerArgs;
 import com.microsoft.applicationinsights.internal.channel.TransmissionOutput;
 import com.microsoft.applicationinsights.internal.logger.InternalLogger;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.ConnectionPoolTimeoutException;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.util.EntityUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 
-import javax.annotation.Nullable;
-import java.io.IOException;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.util.concurrent.TimeUnit;
+import reactor.core.publisher.Mono;
 
 /**
  * The class is responsible for the actual sending of
  * {@link com.microsoft.applicationinsights.internal.channel.common.Transmission}
  *
- * The class uses Apache's HttpClient framework for that.
+ * The class uses <strike>Apache's HttpClient</strike> Spring WebClient framework for that.
  *
  * Created by gupele on 12/18/2014.
+ * Update by gdufrene on 3/28/2020.
  */
 public final class TransmissionNetworkOutput implements TransmissionOutput {
     private static final String CONTENT_TYPE_HEADER = "Content-Type";
@@ -67,8 +67,8 @@ public final class TransmissionNetworkOutput implements TransmissionOutput {
     private volatile boolean stopped;
     private volatile TelemetryConfiguration configuration;
 
-    // Use one instance for optimization
-    private final ApacheSender httpClient;
+    // Use one instance for optimization (?)
+    private WebClient httpClient;
 
     private TransmissionPolicyManager transmissionPolicyManager;
 
@@ -108,7 +108,7 @@ public final class TransmissionNetworkOutput implements TransmissionOutput {
         if (StringUtils.isNotEmpty(serverUri)) {
             InternalLogger.INSTANCE.warn("Setting the endpoint via the <Channel> element is deprecated and will be removed in a future version. Use the top-level element <ConnectionString>.");
         }
-        httpClient = ApacheSenderFactory.INSTANCE.create();
+        // httpClient = ApacheSenderFactory.INSTANCE.create();
         this.transmissionPolicyManager = transmissionPolicyManager;
         stopped = false;
         if (InternalLogger.INSTANCE.isTraceEnabled()) {
@@ -138,7 +138,7 @@ public final class TransmissionNetworkOutput implements TransmissionOutput {
             return;
         }
 
-        httpClient.close();
+        // httpClient.close();
         stopped = true;
     }
 
@@ -162,81 +162,50 @@ public final class TransmissionNetworkOutput implements TransmissionOutput {
                 return false;
             }
 
-            HttpResponse response = null;
-            HttpPost request = null;
+            // HttpResponse response = null;
+            // HttpPost request = null;
             int code = 0;
             String reason = null;
             String respString = null;
             Throwable ex = null;
-            Header retryAfterHeader = null;
-            try {
-                // POST the transmission data to the endpoint
-                request = createTransmissionPostRequest(transmission);
-                httpClient.enhanceRequest(request);
-                response = httpClient.sendPostRequest(request);
-                HttpEntity respEntity = response.getEntity();
-                code = response.getStatusLine().getStatusCode();
-                reason = response.getStatusLine().getReasonPhrase();
-                respString = EntityUtils.toString(respEntity);
-                retryAfterHeader = response.getFirstHeader(RESPONSE_THROTTLING_HEADER);
+            String retryAfterHeader = null;
 
-                // After we reach our instant retry limit we should fail to second TransmissionOutput
-                if (code > HttpStatus.SC_PARTIAL_CONTENT && transmission.getNumberOfSends() > this.transmissionPolicyManager.getMaxInstantRetries()) {
-                    return false;
-                } else if (code == HttpStatus.SC_OK) {
-                    // If we've completed then clear the back off flags as the channel does not need
-                    // to be throttled
-                    transmissionPolicyManager.clearBackoff();
-                }
-                return true;
+            // POST the transmission data to the endpoint
+            ClientResponse response = 
+            	createTransmissionPostRequest(transmission)
+            	.doOnError(error -> {
+            		InternalLogger.INSTANCE.error("Failed to send, unexpected exception.%nStack Trace:%n%s", ExceptionUtils.getStackTrace(error));
+            	})
+            	.block();
+            code = response.statusCode().value();
+            reason = response.statusCode().getReasonPhrase();
+            List<String> throttling = response.headers().header(RESPONSE_THROTTLING_HEADER);
+            if ( throttling.size() > 0 ) retryAfterHeader = throttling.get(0);
+            respString = response.bodyToMono(String.class).block();
 
-            } catch (ConnectionPoolTimeoutException e) {
-                ex = e;
-                InternalLogger.INSTANCE.error("Failed to send, connection pool timeout exception%nStack Trace:%n%s", ExceptionUtils.getStackTrace(e));
-            } catch (SocketException e) {
-                ex = e;
-                InternalLogger.INSTANCE.error("Failed to send, socket exception.%nStack Trace:%n%s", ExceptionUtils.getStackTrace(e));
-            } catch (UnknownHostException e) {
-                ex = e;
-                InternalLogger.INSTANCE.error("Failed to send, wrong host address or cannot reach address due to network issues.%nStack Trace:%n%s", ExceptionUtils.getStackTrace(e));
-            } catch (IOException ioe) {
-                ex = ioe;
-                InternalLogger.INSTANCE.error("Failed to send.%nStack Trace:%n%s", ExceptionUtils.getStackTrace(ioe));
-            } catch (Exception e) {
-                ex = e;
-                InternalLogger.INSTANCE.error("Failed to send, unexpected exception.%nStack Trace:%n%s", ExceptionUtils.getStackTrace(e));
-            } catch (ThreadDeath td) {
-                throw td;
-            } catch (Throwable t) {
-                ex = t;
-                try {
-                    InternalLogger.INSTANCE.error("Failed to send, unexpected error.%nStack Trace:%n%s", ExceptionUtils.getStackTrace(t));
-                } catch (ThreadDeath td) {
-                    throw td;
-                } catch (Throwable t2) {
-                    // chomp
-                }
-            } finally {
-                if (request != null) {
-                    request.releaseConnection();
-                }
-                httpClient.dispose(response);
+            // After we reach our instant retry limit we should fail to second TransmissionOutput
+            if (code > HttpStatus.PARTIAL_CONTENT.value() && transmission.getNumberOfSends() > this.transmissionPolicyManager.getMaxInstantRetries()) {
+                return false;
+            } else if (code == HttpStatus.OK.value()) {
+                // If we've completed then clear the back off flags as the channel does not need
+                // to be throttled
+                transmissionPolicyManager.clearBackoff();
+            }
 
-                if (code == HttpStatus.SC_BAD_REQUEST) {
-                    InternalLogger.INSTANCE.error("Error sending data: %s", reason);
-                } else if (code != HttpStatus.SC_OK) {
-                    // Invoke the listeners for handling things like errors
-                    // The listeners will handle the back off logic as well as the dispatch
-                    // operation
-                    TransmissionHandlerArgs args = new TransmissionHandlerArgs();
-                    args.setTransmission(transmission);
-                    args.setTransmissionDispatcher(transmissionDispatcher);
-                    args.setResponseBody(respString);
-                    args.setResponseCode(code);
-                    args.setException(ex);
-                    args.setRetryHeader(retryAfterHeader);
-                    this.transmissionPolicyManager.onTransmissionSent(args);
-                }
+            if (code == HttpStatus.BAD_REQUEST.value()) {
+                InternalLogger.INSTANCE.error("Error sending data: %s", reason);
+            } else if (code != HttpStatus.OK.value()) {
+                // Invoke the listeners for handling things like errors
+                // The listeners will handle the back off logic as well as the dispatch
+                // operation
+                TransmissionHandlerArgs args = new TransmissionHandlerArgs();
+                args.setTransmission(transmission);
+                args.setTransmissionDispatcher(transmissionDispatcher);
+                args.setResponseBody(respString);
+                args.setResponseCode(code);
+                args.setException(ex);
+                args.setRetryHeader(retryAfterHeader);
+                this.transmissionPolicyManager.onTransmissionSent(args);
             }
         }
         // If we end up here we've hit an error code we do not expect (403, 401, 400,
@@ -252,15 +221,15 @@ public final class TransmissionNetworkOutput implements TransmissionOutput {
      * @param transmission The transmission to send.
      * @return The completed {@link HttpPost} object
      */
-    private HttpPost createTransmissionPostRequest(Transmission transmission) {
-        HttpPost request = new HttpPost(getIngestionEndpoint());
-        request.addHeader(CONTENT_TYPE_HEADER, transmission.getWebContentType());
-        request.addHeader(CONTENT_ENCODING_HEADER, transmission.getWebContentEncodingType());
-
-        ByteArrayEntity bae = new ByteArrayEntity(transmission.getContent());
-        request.setEntity(bae);
-
-        return request;
+    private Mono<ClientResponse> createTransmissionPostRequest(Transmission transmission) {
+    	WebClient client = WebClient.create(getIngestionEndpoint()); 
+    	return client
+			.post()
+			.uri(URI.create(getIngestionEndpoint()))
+			.syncBody( transmission.getContent() )
+    		.header(CONTENT_TYPE_HEADER, transmission.getWebContentType())
+    		.header(CONTENT_ENCODING_HEADER, transmission.getWebContentEncodingType())
+    		.exchange();
     }
 
     private String getIngestionEndpoint() {

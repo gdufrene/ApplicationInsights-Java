@@ -22,8 +22,8 @@
 package com.microsoft.applicationinsights.internal.channel;
 
 import java.util.Collection;
+import java.util.Optional;
 
-import com.google.common.base.Optional;
 import com.microsoft.applicationinsights.internal.channel.common.Transmission;
 
 /**

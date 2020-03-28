@@ -21,12 +21,19 @@
 
 package com.microsoft.applicationinsights.channel.concrete;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
+
+import java.net.URI;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
 import com.microsoft.applicationinsights.TelemetryConfiguration;
 import com.microsoft.applicationinsights.channel.TelemetryChannel;
 import com.microsoft.applicationinsights.channel.TelemetrySampler;
+import com.microsoft.applicationinsights.common.Preconditions;
 import com.microsoft.applicationinsights.internal.channel.ConfiguredTransmitterFactory;
 import com.microsoft.applicationinsights.internal.channel.TelemetriesTransmitter;
 import com.microsoft.applicationinsights.internal.channel.TransmitterFactory;
@@ -35,12 +42,6 @@ import com.microsoft.applicationinsights.internal.logger.InternalLogger;
 import com.microsoft.applicationinsights.internal.util.LimitsEnforcer;
 import com.microsoft.applicationinsights.internal.util.Sanitizer;
 import com.microsoft.applicationinsights.telemetry.Telemetry;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-
-import java.net.URI;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  *
@@ -229,7 +230,7 @@ public abstract class TelemetryChannelBase<T> implements TelemetryChannel {
         return transmitterFactory;
     }
 
-    @VisibleForTesting
+    // @VisibleForTesting
     TelemetryConfiguration getConfiguration() {
         return this.configuration;
     }
@@ -397,7 +398,7 @@ public abstract class TelemetryChannelBase<T> implements TelemetryChannel {
      * @throws IllegalArgumentException if the endpointAddress is invalid
      */
     protected void makeSureEndpointAddressIsValid(String endpointAddress) {
-        if (Strings.isNullOrEmpty(endpointAddress)) {
+        if (StringUtils.isEmpty(endpointAddress)) {
             return;
         }
 

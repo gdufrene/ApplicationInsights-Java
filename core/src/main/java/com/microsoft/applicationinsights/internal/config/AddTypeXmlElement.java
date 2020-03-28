@@ -23,22 +23,23 @@ package com.microsoft.applicationinsights.internal.config;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import com.thoughtworks.xstream.annotations.XStreamAlias;
-import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
-import com.thoughtworks.xstream.annotations.XStreamImplicit;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 
 /**
  * Created by gupele on 3/15/2015.
  */
+@XmlAccessorType(XmlAccessType.FIELD)
 public class AddTypeXmlElement {
 
-    @XStreamAsAttribute
+    @XmlAttribute
     private String type;
 
-    @XStreamImplicit(itemFieldName = "Param")
+    @XmlElement(name="Param")
     private ArrayList<ParamXmlElement> paramElements = new ArrayList<>();
 
     public String getType() {

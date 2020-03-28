@@ -23,18 +23,19 @@ package com.microsoft.applicationinsights.agent.internal;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Splitter;
 import com.microsoft.applicationinsights.agent.internal.config.AgentConfiguration;
 import com.microsoft.applicationinsights.agent.internal.config.BuiltInInstrumentation;
 import com.microsoft.applicationinsights.agent.internal.config.ClassInstrumentationData;
 import com.microsoft.applicationinsights.agent.internal.config.MethodInfo;
 import com.microsoft.applicationinsights.agent.internal.config.builder.XmlAgentConfigurationBuilder;
+
+import org.apache.commons.lang3.StringUtils;
 import org.glowroot.instrumentation.api.Descriptor.CaptureKind;
 import org.glowroot.instrumentation.engine.config.AdviceConfig;
 import org.glowroot.instrumentation.engine.config.ImmutableAdviceConfig;
@@ -206,9 +207,11 @@ class AIAgentXmlLoader {
         }
     }
 
-    @VisibleForTesting
+    //@VisibleForTesting
     static boolean validJavaFqcn(String fqcn) {
-        List<String> parts = Splitter.on('.').splitToList(fqcn);
+    	if ( StringUtils.isEmpty(fqcn) ) return false;
+    	if ( fqcn.endsWith(".") ) return false;
+    	List<String> parts = Arrays.asList(StringUtils.split(fqcn, '.'));
         if (parts.isEmpty()) {
             return false;
         }
@@ -220,7 +223,7 @@ class AIAgentXmlLoader {
         return validJavaIdentifier(parts.get(parts.size() - 1));
     }
 
-    @VisibleForTesting
+    //@VisibleForTesting
     static boolean validJavaIdentifier(String identifier) {
         if (identifier.isEmpty()) {
             return false;

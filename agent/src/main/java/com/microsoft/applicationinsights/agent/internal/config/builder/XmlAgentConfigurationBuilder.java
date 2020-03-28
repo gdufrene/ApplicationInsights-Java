@@ -31,9 +31,10 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import com.google.common.base.Strings;
 import com.microsoft.applicationinsights.agent.internal.config.AgentConfiguration;
 import com.microsoft.applicationinsights.agent.internal.config.ClassInstrumentationData;
+
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -116,7 +117,7 @@ public class XmlAgentConfigurationBuilder {
                 }
 
                 String className = classTag.getAttribute(NAME_ATTRIBUTE);
-                if (Strings.isNullOrEmpty(className)) {
+                if (StringUtils.isEmpty(className)) {
                     continue;
                 }
 
@@ -199,7 +200,7 @@ public class XmlAgentConfigurationBuilder {
         Element classNode = (Element) item;
 
         String strValue = classNode.getAttribute(ENABLED_ATTRIBUTE);
-        if (!Strings.isNullOrEmpty(strValue)) {
+        if (!StringUtils.isEmpty(strValue)) {
             boolean isEnabled = Boolean.valueOf(strValue);
             if (!isEnabled) {
                 return null;
@@ -211,7 +212,7 @@ public class XmlAgentConfigurationBuilder {
 
     private ClassInstrumentationData createClassInstrumentationData(Element classTag) {
         String type = classTag.getAttribute("type");
-        if (Strings.isNullOrEmpty(type)) {
+        if (StringUtils.isEmpty(type)) {
             type = ClassInstrumentationData.OTHER_TYPE;
         }
         long thresholdInMS = XmlParserUtils.getLongAttribute(classTag, THRESHOLD_ATTRIBUTE, 0);
@@ -227,7 +228,7 @@ public class XmlAgentConfigurationBuilder {
                 continue;
             }
             String methodName = methodTag.getAttribute(NAME_ATTRIBUTE);
-            if (Strings.isNullOrEmpty(methodName)) {
+            if (StringUtils.isEmpty(methodName)) {
                 continue;
             }
             long thresholdInMS =

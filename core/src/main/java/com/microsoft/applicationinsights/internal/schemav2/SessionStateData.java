@@ -21,12 +21,11 @@
 
 package com.microsoft.applicationinsights.internal.schemav2;
 
-import com.google.common.base.Preconditions;
+import java.io.IOException;
+
+import com.microsoft.applicationinsights.common.Preconditions;
 import com.microsoft.applicationinsights.telemetry.JsonTelemetryDataSerializer;
 import com.microsoft.applicationinsights.telemetry.SessionState;
-import org.apache.http.annotation.Obsolete;
-
-import java.io.IOException;
 
 /**
  * Created by gupele on 2/19/2015.

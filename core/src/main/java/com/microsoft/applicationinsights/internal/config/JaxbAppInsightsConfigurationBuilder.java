@@ -21,15 +21,17 @@
 
 package com.microsoft.applicationinsights.internal.config;
 
-import java.io.IOException;
 import java.io.InputStream;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
+import javax.xml.transform.stream.StreamSource;
+
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import com.microsoft.applicationinsights.internal.logger.InternalLogger;
-import com.thoughtworks.xstream.converters.reflection.PureJavaReflectionProvider;
-import com.thoughtworks.xstream.io.xml.Xpp3Driver;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 
 /**
  * The JAXB implementation of the {@link com.microsoft.applicationinsights.internal.config.AppInsightsConfigurationBuilder}
@@ -48,17 +50,9 @@ class JaxbAppInsightsConfigurationBuilder implements AppInsightsConfigurationBui
         }
 
         try {
-            Java7SaferXStream xstream = new Java7SaferXStream(new PureJavaReflectionProvider(), new Xpp3Driver());
-
-            xstream.ignoreUnknownElements(); // backwards compatible with jaxb behavior
-
-            Java7SaferXStream.setupDefaultSecurity(xstream);
-            xstream.allowTypesByWildcard(new String[] {
-                    "com.microsoft.applicationinsights.internal.config.*"
-            });
-            xstream.processAnnotations(ApplicationInsightsXmlConfiguration.class);
-
-            return (ApplicationInsightsXmlConfiguration) xstream.fromXML(resourceFile);
+        	Unmarshaller unmarshaller = JAXBContext.newInstance(ApplicationInsightsXmlConfiguration.class)
+        			.createUnmarshaller();
+        	return unmarshaller.unmarshal(new StreamSource(resourceFile), ApplicationInsightsXmlConfiguration.class).getValue();
         } catch (Exception e) {
             InternalLogger.INSTANCE.error("Failed to parse configuration file: '%s'",
                     ExceptionUtils.getStackTrace(e));

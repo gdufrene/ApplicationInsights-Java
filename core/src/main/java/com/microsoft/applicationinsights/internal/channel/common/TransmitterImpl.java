@@ -22,22 +22,22 @@
 package com.microsoft.applicationinsights.internal.channel.common;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
+import com.microsoft.applicationinsights.common.Preconditions;
 import com.microsoft.applicationinsights.internal.channel.TelemetriesTransmitter;
 import com.microsoft.applicationinsights.internal.channel.TelemetrySerializer;
 import com.microsoft.applicationinsights.internal.channel.TransmissionDispatcher;
 import com.microsoft.applicationinsights.internal.channel.TransmissionsLoader;
 import com.microsoft.applicationinsights.internal.logger.InternalLogger;
 import com.microsoft.applicationinsights.internal.util.ThreadPoolUtils;
-
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 
 /**
  * The default implementation of the {@link TelemetriesTransmitter}

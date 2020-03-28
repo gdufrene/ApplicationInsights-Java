@@ -23,7 +23,7 @@ package com.microsoft.applicationinsights.internal.channel.common;
 
 import java.util.concurrent.TimeUnit;
 
-import com.google.common.base.Preconditions;
+import com.microsoft.applicationinsights.common.Preconditions;
 import com.microsoft.applicationinsights.internal.channel.TransmissionDispatcher;
 import com.microsoft.applicationinsights.internal.channel.TransmissionOutput;
 

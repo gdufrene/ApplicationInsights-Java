@@ -21,12 +21,12 @@
 
 package com.microsoft.applicationinsights.internal.schemav2;
 
-import com.google.common.base.Preconditions;
-import com.microsoft.applicationinsights.telemetry.JsonTelemetryDataSerializer;
-
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
+import com.microsoft.applicationinsights.common.Preconditions;
+import com.microsoft.applicationinsights.telemetry.JsonTelemetryDataSerializer;
 
 /**
  * @deprecated

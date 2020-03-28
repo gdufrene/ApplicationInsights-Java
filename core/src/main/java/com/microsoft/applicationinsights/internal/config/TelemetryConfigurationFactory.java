@@ -21,34 +21,40 @@
 
 package com.microsoft.applicationinsights.internal.config;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.microsoft.applicationinsights.internal.channel.samplingV2.FixedRateSamplingTelemetryProcessor;
-import com.microsoft.applicationinsights.internal.heartbeat.HeartBeatModule;
 import java.io.InputStream;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
 import com.microsoft.applicationinsights.TelemetryConfiguration;
-import com.microsoft.applicationinsights.extensibility.*;
-import com.microsoft.applicationinsights.channel.concrete.inprocess.InProcessTelemetryChannel;
 import com.microsoft.applicationinsights.channel.TelemetryChannel;
+import com.microsoft.applicationinsights.channel.TelemetrySampler;
+import com.microsoft.applicationinsights.channel.concrete.inprocess.InProcessTelemetryChannel;
+import com.microsoft.applicationinsights.extensibility.PerformanceCountersCollectionPlugin;
+import com.microsoft.applicationinsights.extensibility.TelemetryInitializer;
+import com.microsoft.applicationinsights.extensibility.TelemetryModule;
+import com.microsoft.applicationinsights.extensibility.TelemetryProcessor;
 import com.microsoft.applicationinsights.internal.annotation.AnnotationPackageScanner;
 import com.microsoft.applicationinsights.internal.annotation.BuiltInProcessor;
 import com.microsoft.applicationinsights.internal.annotation.PerformanceModule;
-import com.microsoft.applicationinsights.channel.TelemetrySampler;
+import com.microsoft.applicationinsights.internal.channel.samplingV2.FixedRateSamplingTelemetryProcessor;
+import com.microsoft.applicationinsights.internal.heartbeat.HeartBeatModule;
 import com.microsoft.applicationinsights.internal.jmx.JmxAttributeData;
 import com.microsoft.applicationinsights.internal.logger.InternalLogger;
 import com.microsoft.applicationinsights.internal.perfcounter.JmxMetricPerformanceCounter;
 import com.microsoft.applicationinsights.internal.perfcounter.JvmPerformanceCountersModule;
-import com.microsoft.applicationinsights.internal.perfcounter.PerformanceCounterContainer;
 import com.microsoft.applicationinsights.internal.perfcounter.PerformanceCounterConfigurationAware;
-
-import com.google.common.base.Strings;
+import com.microsoft.applicationinsights.internal.perfcounter.PerformanceCounterContainer;
 import com.microsoft.applicationinsights.internal.perfcounter.ProcessPerformanceCountersModule;
 import com.microsoft.applicationinsights.internal.processor.PageViewTelemetryFilter;
 import com.microsoft.applicationinsights.internal.processor.RequestTelemetryFilter;
@@ -57,11 +63,11 @@ import com.microsoft.applicationinsights.internal.processor.TelemetryEventFilter
 import com.microsoft.applicationinsights.internal.processor.TraceTelemetryFilter;
 import com.microsoft.applicationinsights.internal.quickpulse.QuickPulse;
 import com.microsoft.applicationinsights.internal.util.LocalStringsUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 
 /**
  * Initializer class for configuration instances.
  */
+@XmlAccessorType(XmlAccessType.FIELD)
 public enum TelemetryConfigurationFactory {
     INSTANCE;
 
@@ -88,7 +94,7 @@ public enum TelemetryConfigurationFactory {
     static final String EXTERNAL_PROPERTY_IKEY_NAME = "APPLICATION_INSIGHTS_IKEY";
     static final String EXTERNAL_PROPERTY_IKEY_NAME_SECONDARY = "APPINSIGHTS_INSTRUMENTATIONKEY";
 
-    @VisibleForTesting
+    // @VisibleForTesting
     AppInsightsConfigurationBuilder builder = new JaxbAppInsightsConfigurationBuilder();
 
     private static final Set<String> defaultPerformaceModuleClassNames = new HashSet<>();
@@ -290,24 +296,24 @@ public enum TelemetryConfigurationFactory {
 
             // First, check whether an i-key was provided as a java system property i.e. '-DAPPLICATION_INSIGHTS_IKEY=i_key', or '-DAPPINSIGHTS_INSTRUMENTATIONKEY=i_key'
             ikey = System.getProperty(EXTERNAL_PROPERTY_IKEY_NAME);
-            if (!Strings.isNullOrEmpty(ikey)) {
+            if (!StringUtils.isEmpty(ikey)) {
                 configuration.setInstrumentationKey(ikey);
                 return;
             }
             ikey = System.getProperty(EXTERNAL_PROPERTY_IKEY_NAME_SECONDARY);
-            if (!Strings.isNullOrEmpty(ikey)) {
+            if (!StringUtils.isEmpty(ikey)) {
                 configuration.setInstrumentationKey(ikey);
                 return;
             }
 
             // Second, try to find the i-key as an environment variable 'APPLICATION_INSIGHTS_IKEY' or 'APPINSIGHTS_INSTRUMENTATIONKEY'
             ikey = System.getenv(EXTERNAL_PROPERTY_IKEY_NAME);
-            if (!Strings.isNullOrEmpty(ikey)) {
+            if (!StringUtils.isEmpty(ikey)) {
                 configuration.setInstrumentationKey(ikey);
                 return;
             }
             ikey = System.getenv(EXTERNAL_PROPERTY_IKEY_NAME_SECONDARY);
-            if (!Strings.isNullOrEmpty(ikey)) {
+            if (!StringUtils.isEmpty(ikey)) {
                 configuration.setInstrumentationKey(ikey);
                 return;
             }
@@ -339,8 +345,8 @@ public enum TelemetryConfigurationFactory {
         String connectionString = configXml.getConnectionString(); // config.xml
 
         String nextValue = System.getenv(CONNECTION_STRING_ENV_VAR_NAME);
-        if (!Strings.isNullOrEmpty(nextValue)) {
-            if (!Strings.isNullOrEmpty(connectionString)) {
+        if (!StringUtils.isEmpty(nextValue)) {
+            if (!StringUtils.isEmpty(connectionString)) {
                 InternalLogger.INSTANCE.warn("Environment variable %s is overriding connection string value from %s", CONNECTION_STRING_ENV_VAR_NAME, CONFIG_FILE_NAME);
             }
             connectionString = nextValue;
@@ -462,17 +468,17 @@ public enum TelemetryConfigurationFactory {
                     data.put(jmxElement.getObjectName(), collection);
                 }
 
-                if (Strings.isNullOrEmpty(jmxElement.getObjectName())) {
+                if (StringUtils.isEmpty(jmxElement.getObjectName())) {
                     InternalLogger.INSTANCE.error("JMX object name is empty, will be ignored");
                     continue;
                 }
 
-                if (Strings.isNullOrEmpty(jmxElement.getAttribute())) {
+                if (StringUtils.isEmpty(jmxElement.getAttribute())) {
                     InternalLogger.INSTANCE.error("JMX attribute is empty for '%s', will be ignored", jmxElement.getObjectName());
                     continue;
                 }
 
-                if (Strings.isNullOrEmpty(jmxElement.getDisplayName())) {
+                if (StringUtils.isEmpty(jmxElement.getDisplayName())) {
                     InternalLogger.INSTANCE.error("JMX display name is empty for '%s', will be ignored", jmxElement.getObjectName());
                     continue;
                 }
@@ -602,7 +608,7 @@ public enum TelemetryConfigurationFactory {
         return false;
     }
 
-    @VisibleForTesting
+    // @VisibleForTesting
     void setPerformanceCountersSection(String performanceCountersSection) {
         this.performanceCountersSection = performanceCountersSection;
     }

@@ -21,17 +21,18 @@
 
 package com.microsoft.applicationinsights.internal.quickpulse;
 
-import java.io.IOException;
 import java.util.Date;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.microsoft.applicationinsights.internal.logger.InternalLogger;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ByteArrayEntity;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.ClientRequest;
+import org.springframework.web.reactive.function.client.ClientResponse;
+import org.springframework.web.reactive.function.client.ExchangeFunctions;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import com.microsoft.applicationinsights.TelemetryConfiguration;
-import com.microsoft.applicationinsights.internal.channel.common.ApacheSender;
+import com.microsoft.applicationinsights.internal.channel.common.HttpSender;
+import com.microsoft.applicationinsights.internal.logger.InternalLogger;
 
 /**
  * Created by gupele on 12/12/2016.
@@ -40,12 +41,12 @@ final class DefaultQuickPulsePingSender implements QuickPulsePingSender {
     private static final String QP_BASE_URI = "https://rt.services.visualstudio.com/QuickPulseService.svc";
 
     private final TelemetryConfiguration configuration;
-    private final ApacheSender apacheSender;
+    private final HttpSender apacheSender;
     private final QuickPulseNetworkHelper networkHelper = new QuickPulseNetworkHelper();
     private String pingPrefix;
     private long lastValidTransmission = 0;
 
-    public DefaultQuickPulsePingSender(ApacheSender sender, TelemetryConfiguration configuration, String instanceName, String quickPulseId) {
+    public DefaultQuickPulsePingSender(HttpSender sender, TelemetryConfiguration configuration, String instanceName, String quickPulseId) {
         this.configuration = configuration;
         this.apacheSender = sender;
 
@@ -64,48 +65,44 @@ final class DefaultQuickPulsePingSender implements QuickPulsePingSender {
     }
 
     /**
-     * @deprecated Use {@link #DefaultQuickPulsePingSender(ApacheSender, TelemetryConfiguration, String, String)}
+     * @deprecated Use {@link #DefaultQuickPulsePingSender(HttpSender, TelemetryConfiguration, String, String)}
      */
     @Deprecated
-    public DefaultQuickPulsePingSender(final ApacheSender apacheSender, final String instanceName, final String quickPulseId) {
+    public DefaultQuickPulsePingSender(final HttpSender apacheSender, final String instanceName, final String quickPulseId) {
         this(apacheSender, null, instanceName, quickPulseId);
     }
 
     @Override
     public QuickPulseStatus ping() {
         final Date currentDate = new Date();
-        final HttpPost request = networkHelper.buildRequest(currentDate, getQuickPulsePingUri());
-
-        final ByteArrayEntity pingEntity = buildPingEntity(currentDate.getTime());
-        request.setEntity(pingEntity);
+        
+        ClientRequest request = networkHelper.buildRequest(currentDate, getQuickPulsePingUri())
+        		.body(BodyInserters.fromObject(buildPingEntity(currentDate.getTime())))
+        		.build();
+        
+        ClientResponse response = ExchangeFunctions.create(new ReactorClientHttpConnector())
+        	.exchange(request)
+        	.block();
 
         final long sendTime = System.nanoTime();
-        HttpResponse response = null;
-        try {
-            response = apacheSender.sendPostRequest(request);
-            if (networkHelper.isSuccess(response)) {
-                final QuickPulseStatus quickPulseResultStatus = networkHelper.getQuickPulseStatus(response);
-                switch (quickPulseResultStatus) {
-                    case QP_IS_OFF:
-                    case QP_IS_ON:
-                        lastValidTransmission = sendTime;
-                        return quickPulseResultStatus;
 
-                    default:
-                        break;
-                }
-            }
-        } catch (IOException e) {
-            // chomp
-        } finally {
-            if (response != null) {
-                apacheSender.dispose(response);
+        if (networkHelper.isSuccess(response)) {
+            final QuickPulseStatus quickPulseResultStatus = networkHelper.getQuickPulseStatus(response);
+            switch (quickPulseResultStatus) {
+                case QP_IS_OFF:
+                case QP_IS_ON:
+                    lastValidTransmission = sendTime;
+                    return quickPulseResultStatus;
+
+                default:
+                    break;
             }
         }
+
         return onPingError(sendTime);
     }
 
-    @VisibleForTesting
+    // @VisibleForTesting
     String getQuickPulsePingUri() {
         return getQuickPulseEndpoint() + "/ping?ikey=" + getInstrumentationKey();
     }
@@ -123,12 +120,11 @@ final class DefaultQuickPulsePingSender implements QuickPulsePingSender {
         }
     }
 
-    private ByteArrayEntity buildPingEntity(long timeInMillis) {
-        String sb = pingPrefix + timeInMillis +
+    private String buildPingEntity(long timeInMillis) {
+        return pingPrefix + timeInMillis +
                 ")\\/\"," +
                 "\"Version\":\"2.2.0-738\"" +
                 "}";
-        return new ByteArrayEntity(sb.getBytes());
     }
 
     private QuickPulseStatus onPingError(long sendTime) {

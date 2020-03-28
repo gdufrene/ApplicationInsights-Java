@@ -32,15 +32,19 @@ import java.net.URLClassLoader;
 import java.security.CodeSource;
 import java.util.HashSet;
 
-import com.microsoft.applicationinsights.internal.logger.InternalLogger;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+
+import com.microsoft.applicationinsights.common.Preconditions;
+import com.microsoft.applicationinsights.internal.logger.InternalLogger;
 
 /**
  * Created by gupele on 5/25/2015.
  */
+@XmlAccessorType(XmlAccessType.FIELD)
 public final class ConfigurationFileLocator {
 
     /**
@@ -51,7 +55,7 @@ public final class ConfigurationFileLocator {
     private final String configurationFileName;
 
     public ConfigurationFileLocator(String configurationFileName) {
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(configurationFileName), "configurationFile should be non-null non empty value");
+        Preconditions.checkArgument(!StringUtils.isEmpty(configurationFileName), "configurationFile should be non-null non empty value");
         this.configurationFileName = configurationFileName;
     }
 

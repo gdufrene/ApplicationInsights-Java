@@ -21,18 +21,20 @@
 
 package com.microsoft.applicationinsights.internal.perfcounter;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+
 import com.microsoft.applicationinsights.TelemetryClient;
+import com.microsoft.applicationinsights.common.Preconditions;
 import com.microsoft.applicationinsights.internal.jmx.JmxAttributeData;
 import com.microsoft.applicationinsights.internal.jmx.JmxDataFetcher;
 import com.microsoft.applicationinsights.internal.logger.InternalLogger;
 import com.microsoft.applicationinsights.internal.system.SystemInformation;
 import com.microsoft.applicationinsights.telemetry.PerformanceCounterTelemetry;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * A performance counter that sends {@link com.microsoft.applicationinsights.telemetry.PerformanceCounterTelemetry}
@@ -53,8 +55,8 @@ public final class JmxPerformanceCounter implements PerformanceCounter {
     }
 
     public JmxPerformanceCounter(String categoryName, String counterName, Map<String, Collection<JmxAttributeData>> objectToAttributes) {
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(categoryName), "categoryName should be a valid non-empty value");
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(counterName), "categoryName should be a valid non-empty value");
+        Preconditions.checkArgument(!StringUtils.isEmpty(categoryName), "categoryName should be a valid non-empty value");
+        Preconditions.checkArgument(!StringUtils.isEmpty(counterName), "categoryName should be a valid non-empty value");
         Preconditions.checkNotNull(objectToAttributes, "objectToAttributes should be not null");
         Preconditions.checkArgument(!objectToAttributes.isEmpty(), "objectToAttributes should be not be empty");
 

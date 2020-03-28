@@ -23,8 +23,9 @@ package com.microsoft.applicationinsights.internal.channel.common;
 
 import java.io.Serializable;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
+import org.apache.commons.lang3.StringUtils;
+
+import com.microsoft.applicationinsights.common.Preconditions;
 
 /**
  * Holds the stuff that defines a transmission of data to the server.
@@ -47,8 +48,8 @@ public final class Transmission implements Serializable {
 
     public Transmission(byte[] content, String webContentType, String webContentEncodingType, int version) {
         Preconditions.checkNotNull(content, "Content must be non-null value");
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(webContentType), "webContentType must be a non empty string");
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(webContentEncodingType), "webContentEncodingType must be a non empty string");
+        Preconditions.checkArgument(!StringUtils.isEmpty(webContentType), "webContentType must be a non empty string");
+        Preconditions.checkArgument(!StringUtils.isEmpty(webContentEncodingType), "webContentEncodingType must be a non empty string");
 
         numberOfSends = numberOfPersistence = 0;
         this.version = version;

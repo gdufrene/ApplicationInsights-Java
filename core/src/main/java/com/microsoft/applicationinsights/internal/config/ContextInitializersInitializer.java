@@ -21,17 +21,21 @@
 
 package com.microsoft.applicationinsights.internal.config;
 
+import java.util.List;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+
 import com.microsoft.applicationinsights.TelemetryConfiguration;
 import com.microsoft.applicationinsights.extensibility.ContextInitializer;
 import com.microsoft.applicationinsights.extensibility.initializer.CloudInfoContextInitializer;
 import com.microsoft.applicationinsights.extensibility.initializer.DeviceInfoContextInitializer;
 import com.microsoft.applicationinsights.extensibility.initializer.SdkVersionContextInitializer;
 
-import java.util.List;
-
 /**
  * Created by gupele on 9/8/2016.
  */
+@XmlAccessorType(XmlAccessType.FIELD)
 final class ContextInitializersInitializer {
     /**
      * Sets the configuration data of Context Initializers in configuration class.

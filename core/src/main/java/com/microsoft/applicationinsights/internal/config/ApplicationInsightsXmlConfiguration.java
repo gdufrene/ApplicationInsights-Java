@@ -21,55 +21,59 @@
 
 package com.microsoft.applicationinsights.internal.config;
 
-import com.thoughtworks.xstream.annotations.XStreamAlias;
-import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Created by gupele on 3/13/2015.
  */
-@XStreamAlias("ApplicationInsights")
+@XmlRootElement(name="ApplicationInsights")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class ApplicationInsightsXmlConfiguration {
 
-    @XStreamAlias("InstrumentationKey")
+    @XmlElement(name="InstrumentationKey")
     private String instrumentationKey;
 
-    @XStreamAlias("ConnectionString")
+    @XmlElement(name="ConnectionString")
     private String connectionString;
 
-    @XStreamAlias("RoleName")
+    @XmlElement(name="RoleName")
     private String roleName;
 
-    @XStreamAlias("DisableTelemetry")
+    @XmlElement(name="DisableTelemetry")
     public boolean disableTelemetry;
 
-    @XStreamAlias("TelemetryInitializers")
+    @XmlElement(name="TelemetryInitializers")
     private TelemetryInitializersXmlElement telemetryInitializers;
 
-    @XStreamAlias("TelemetryProcessors")
+    @XmlElement(name="TelemetryProcessors")
     private TelemetryProcessorsXmlElement telemetryProcessors;
 
-    @XStreamAlias("ContextInitializers")
+    @XmlElement(name="ContextInitializers")
     private ContextInitializersXmlElement contextInitializers;
 
-    @XStreamAlias("Channel")
+    @XmlElement(name="Channel")
     private ChannelXmlElement channel = new ChannelXmlElement();
 
-    @XStreamAlias("TelemetryModules")
+    @XmlElement(name="TelemetryModules")
     private TelemetryModulesXmlElement modules;
 
-    @XStreamAlias("PerformanceCounters")
+    @XmlElement(name="PerformanceCounters")
     private PerformanceCountersXmlElement performance = new PerformanceCountersXmlElement();
 
-    @XStreamAlias("SDKLogger")
+    @XmlElement(name="SDKLogger")
     private SDKLoggerXmlElement sdkLogger;
 
-    @XStreamAlias("Sampling")
+    @XmlElement(name="Sampling")
     private SamplerXmlElement sampler;
 
-    @XStreamAlias("QuickPulse")
+    @XmlElement(name="QuickPulse")
     private QuickPulseXmlElement quickPulse;
 
-    @XStreamAsAttribute
+    @XmlAttribute
     private String schemaVersion;
 
     public String getInstrumentationKey() {

@@ -25,7 +25,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.google.common.base.Preconditions;
+import com.microsoft.applicationinsights.common.Preconditions;
 import com.microsoft.applicationinsights.internal.channel.TransmissionDispatcher;
 import com.microsoft.applicationinsights.internal.channel.TransmissionsLoader;
 import com.microsoft.applicationinsights.internal.logger.InternalLogger;
@@ -75,7 +75,7 @@ public final class ActiveTransmissionLoader implements TransmissionsLoader {
         Preconditions.checkNotNull(dispatcher, "dispatcher must be a non-null value");
         Preconditions.checkNotNull(transmissionPolicy, "transmissionPolicy must be a non-null value");
         Preconditions.checkArgument(numberOfThreads > 0, "numberOfThreads must be a positive number");
-        Preconditions.checkArgument(numberOfThreads < MAX_THREADS_ALLOWED, "numberOfThreads must be smaller than %s", MAX_THREADS_ALLOWED);
+        Preconditions.checkArgument(numberOfThreads < MAX_THREADS_ALLOWED, "numberOfThreads must be smaller than " + MAX_THREADS_ALLOWED);
 
         // Guy: This will probably be changed once we have configuration
         this.sleepIntervalWhenNoTransmissionsFoundInMills = DEFAULT_SLEEP_INTERVAL_WHEN_NO_TRANSMISSIONS_FOUND_IN_MILLS;

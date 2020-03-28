@@ -25,13 +25,13 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
 import com.microsoft.applicationinsights.TelemetryClient;
 import com.microsoft.applicationinsights.internal.logger.InternalLogger;
 import com.microsoft.applicationinsights.telemetry.PerformanceCounterTelemetry;
 import com.microsoft.applicationinsights.telemetry.Telemetry;
-
-import com.google.common.base.Strings;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 
 /**
  * The class supplies the overall cpu usage of the machine.
@@ -58,13 +58,13 @@ final class UnixTotalCpuPerformanceCounter extends AbstractUnixPerformanceCounte
     public void report(TelemetryClient telemetryClient) {
         String line = getLineOfData();
 
-        if (!Strings.isNullOrEmpty(line)) {
+        if (!StringUtils.isEmpty(line)) {
             String[] rawStringValues = line.split(" ");
 
             ArrayList<String> stringValues = new ArrayList<String>(rawStringValues.length - 1);
             for (int i = 1; i < rawStringValues.length; ++i) {
                 String stringValue = rawStringValues[i];
-                if (Strings.isNullOrEmpty(stringValue)) {
+                if (StringUtils.isEmpty(stringValue)) {
                     continue;
                 }
 

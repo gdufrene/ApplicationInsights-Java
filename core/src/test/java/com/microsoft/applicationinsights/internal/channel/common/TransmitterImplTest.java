@@ -21,10 +21,21 @@
 
 package com.microsoft.applicationinsights.internal.channel.common;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+
+import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.microsoft.applicationinsights.internal.channel.TelemetriesTransmitter;
 import com.microsoft.applicationinsights.internal.channel.TelemetrySerializer;
@@ -33,13 +44,6 @@ import com.microsoft.applicationinsights.internal.channel.TransmissionsLoader;
 import com.microsoft.applicationinsights.telemetry.JsonTelemetryDataSerializer;
 import com.microsoft.applicationinsights.telemetry.Telemetry;
 import com.microsoft.applicationinsights.telemetry.TelemetryContext;
-import org.junit.Test;
-import org.mockito.Mockito;
-
-import com.google.common.base.Optional;
-
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.any;
 
 public final class TransmitterImplTest {
     private final static String MOCK_WEB_CONTENT_TYPE = "MWCT";
@@ -175,7 +179,7 @@ public final class TransmitterImplTest {
             ArrayList<String> asJsons = toJson(telemetries);
 
             Transmission mockTransmission = new Transmission(new byte[1], MOCK_WEB_CONTENT_TYPE, MOCK_CONTENT_ENCODING_TYPE);
-            Optional<Transmission> mockSerialize = Optional.absent();
+            Optional<Transmission> mockSerialize = Optional.empty();
             if (serializeOk) {
                 mockSerialize = Optional.of(mockTransmission);
             }
@@ -262,7 +266,7 @@ public final class TransmitterImplTest {
             Collection<String> asJsons = toJson(telemetries);
 
             Transmission mockTransmission = new Transmission(new byte[1], MOCK_WEB_CONTENT_TYPE, MOCK_CONTENT_ENCODING_TYPE);
-            Optional<Transmission> mockSerialize = Optional.absent();
+            Optional<Transmission> mockSerialize = Optional.empty();
             if (serializeOk) {
                 mockSerialize = Optional.of(mockTransmission);
             }

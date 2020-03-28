@@ -23,9 +23,12 @@ package com.microsoft.applicationinsights.internal.config;
 
 import org.junit.*;
 
+import com.microsoft.applicationinsights.internal.logger.InternalLogger;
+
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public final class JaxbAppInsightsConfigurationBuilderTest {
     private final static String EXISTING_CONF_TEST_FILE = "ApplicationInsights2.xml";
@@ -42,7 +45,13 @@ public final class JaxbAppInsightsConfigurationBuilderTest {
 
     @Test
     public void testBuilderProducesCorrectConfig() throws IOException {
-        System.setProperty(ConfigurationFileLocator.CONFIG_DIR_PROPERTY, "src/test/resources");
+        // System.setProperty(ConfigurationFileLocator.CONFIG_DIR_PROPERTY, "src/test/resources");
+    	System.setProperty(ConfigurationFileLocator.CONFIG_DIR_PROPERTY, "target/test-classes");
+    	
+    	Map<String, String> loggerData = new HashMap<String, String>();
+    	// loggerData.put("Level", "Trace");
+    	InternalLogger.INSTANCE.initialize("CONSOLE", loggerData);
+    	
         final ApplicationInsightsXmlConfiguration config;
         try (InputStream resourceFile = new ConfigurationFileLocator(EXISTING_CONF_TEST_FILE).getConfigurationFile()) {
             JaxbAppInsightsConfigurationBuilder builder = new JaxbAppInsightsConfigurationBuilder();

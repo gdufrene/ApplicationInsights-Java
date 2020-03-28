@@ -21,14 +21,17 @@
 
 package com.microsoft.applicationinsights.internal.config;
 
-import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 
 /**
  * Created by gupele on 3/16/2015.
  */
+@XmlAccessorType(XmlAccessType.FIELD)
 public class RemoveTypeXmlElement {
 
-    @XStreamAsAttribute
+    @XmlAttribute
     private String type;
 
     public String getType() {

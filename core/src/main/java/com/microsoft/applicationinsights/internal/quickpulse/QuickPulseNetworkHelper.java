@@ -21,37 +21,40 @@
 
 package com.microsoft.applicationinsights.internal.quickpulse;
 
+import java.net.URI;
 import java.util.Date;
+import java.util.List;
 
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPost;
+import org.springframework.http.HttpMethod;
+import org.springframework.web.reactive.function.client.ClientRequest;
+import org.springframework.web.reactive.function.client.ClientResponse;
 
 /**
  * Created by gupele on 12/12/2016.
+ * 
+ * Now use Spring WebClient. gdufrene 3/28/2020
  */
 final class QuickPulseNetworkHelper {
     private final static long TICKS_AT_EPOCH = 621355968000000000L;
     private static final String HEADER_TRANSMISSION_TIME = "x-ms-qps-transmission-time";
     private final static String QP_STATUS_HEADER = "x-ms-qps-subscribed";
 
-    public HttpPost buildRequest(Date currentDate, String address) {
+    public ClientRequest.Builder buildRequest(Date currentDate, String address) {
         final long ticks = currentDate.getTime() * 10000 + TICKS_AT_EPOCH;
 
-        HttpPost request = new HttpPost(address);
-        request.addHeader(HEADER_TRANSMISSION_TIME, String.valueOf(ticks));
-        return request;
+        return ClientRequest.create(HttpMethod.POST, URI.create(address))
+        	.header(HEADER_TRANSMISSION_TIME, String.valueOf(ticks));
     }
 
-    public boolean isSuccess(HttpResponse response) {
-        final int responseCode = response.getStatusLine().getStatusCode();
+    public boolean isSuccess(ClientResponse response) {
+        final int responseCode = response.statusCode().value();
         return responseCode == 200;
     }
 
-    public QuickPulseStatus getQuickPulseStatus(HttpResponse response) {
-        Header header = response.getFirstHeader(QP_STATUS_HEADER);
-        if (header != null) {
-            final String toPost = header.getValue();
+    public QuickPulseStatus getQuickPulseStatus(ClientResponse response) {
+        List<String> headerStatus = response.headers().header(QP_STATUS_HEADER);
+        if (headerStatus.size() > 0) {
+            final String toPost = headerStatus.get(0);
             if ("true".equalsIgnoreCase(toPost)) {
                 return QuickPulseStatus.QP_IS_ON;
             } else {

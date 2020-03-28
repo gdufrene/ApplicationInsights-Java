@@ -21,11 +21,11 @@
 
 package com.microsoft.applicationinsights.telemetry;
 
-import com.google.common.base.Strings;
 import com.microsoft.applicationinsights.internal.schemav2.RequestData;
 import com.microsoft.applicationinsights.internal.util.LocalStringsUtils;
 import com.microsoft.applicationinsights.internal.util.Sanitizer;
-import org.apache.http.HttpStatus;
+
+import org.apache.commons.lang3.StringUtils;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -43,6 +43,8 @@ public final class RequestTelemetry extends BaseSampleSourceTelemetry<RequestDat
     private final RequestData data;
     private String httpMethod;
     private boolean allowAgentToOverrideName;
+    
+    private final static String HTTP_OK = "200";
 
     /**
      * Envelope Name for this telemetry.
@@ -66,7 +68,7 @@ public final class RequestTelemetry extends BaseSampleSourceTelemetry<RequestDat
 
         // Setting mandatory fields.
         setTimestamp(new Date());
-        setResponseCode(Integer.toString(HttpStatus.SC_OK));
+        setResponseCode(HTTP_OK);
         setSuccess(true);
     }
 
@@ -145,7 +147,7 @@ public final class RequestTelemetry extends BaseSampleSourceTelemetry<RequestDat
      * @param name A human-readable name
      */
     public void setName(String name) {
-        if (Strings.isNullOrEmpty(name)) {
+        if (StringUtils.isEmpty(name)) {
             throw new IllegalArgumentException("The event name cannot be null or empty");
         }
         data.setName(name);

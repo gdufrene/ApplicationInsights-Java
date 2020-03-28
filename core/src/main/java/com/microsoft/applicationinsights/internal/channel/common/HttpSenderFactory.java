@@ -21,21 +21,18 @@
 
 package com.microsoft.applicationinsights.internal.channel.common;
 
-import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.junit.Test;
+import com.microsoft.applicationinsights.internal.logger.InternalLogger;
 
-import java.io.IOException;
+/**
+ * Created by gupele on 6/4/2015.
+ */
+public enum HttpSenderFactory {
+    INSTANCE;
 
-import static org.junit.Assert.*;
+    private HttpSender sender = WebClientSender.create();
 
-public final class ApacheSender43Test {
-    @Test
-    public void testHttpClientType() throws IOException {
-        HttpClient tested = ApacheSender43.create().getHttpClient();
-        assertNotNull(tested);
-
-        CloseableHttpClient httpClient = (CloseableHttpClient)tested;
-        httpClient.close();
+    public synchronized HttpSender create() {
+        InternalLogger.INSTANCE.trace("Using Spring web client");
+        return sender;
     }
 }

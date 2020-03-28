@@ -24,7 +24,7 @@ package com.microsoft.applicationinsights.agent.internal.config;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.google.common.base.Strings;
+import org.apache.commons.lang3.StringUtils;
 
 public class ClassInstrumentationData {
 
@@ -66,7 +66,7 @@ public class ClassInstrumentationData {
 
         MethodInfo methodInfo = new MethodInfo(thresholdInMS);
 
-        if (Strings.isNullOrEmpty(signature)) {
+        if (StringUtils.isEmpty(signature)) {
             innerMap.put(ANY_SIGNATURE_MARKER, methodInfo);
         } else {
             innerMap.put(signature, methodInfo);

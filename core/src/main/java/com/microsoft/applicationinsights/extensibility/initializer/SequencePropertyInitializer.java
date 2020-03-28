@@ -22,15 +22,16 @@
 package com.microsoft.applicationinsights.extensibility.initializer;
 
 import java.nio.ByteBuffer;
+import java.util.Base64;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.microsoft.applicationinsights.extensibility.TelemetryInitializer;
 import com.microsoft.applicationinsights.telemetry.Telemetry;
 
-import org.apache.commons.codec.binary.Base64;
 
-import com.google.common.base.Strings;
 
 /**
  * An {@link com.microsoft.applicationinsights.extensibility.TelemetryInitializer} implementation that
@@ -53,18 +54,17 @@ public final class SequencePropertyInitializer implements TelemetryInitializer {
     @Override
     public void initialize(Telemetry telemetry) {
         String sequence = telemetry.getSequence();
-        if (Strings.isNullOrEmpty(sequence)) {
+        if (StringUtils.isEmpty(sequence)) {
             sequence = stablePrefix + String.valueOf(currentNumber.incrementAndGet());
             telemetry.setSequence(sequence);
         }
     }
 
     private static String uuidToBase64() {
-        Base64 base64 = new Base64();
         UUID uuid = UUID.randomUUID();
         ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
         bb.putLong(uuid.getMostSignificantBits());
         bb.putLong(uuid.getLeastSignificantBits());
-        return base64.encodeBase64URLSafeString(bb.array());
+        return Base64.getUrlEncoder().encodeToString(bb.array());
     }
 }

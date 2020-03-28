@@ -21,7 +21,7 @@
 
 package com.microsoft.applicationinsights.agent.internal.config.builder;
 
-import com.google.common.base.Strings;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
@@ -51,7 +51,7 @@ class XmlParserUtils {
         }
         try {
             String strValue = element.getAttribute(ENABLED_ATTRIBUTE);
-            if (!Strings.isNullOrEmpty(strValue)) {
+            if (!StringUtils.isEmpty(strValue)) {
                 return Boolean.parseBoolean(strValue);
             }
             return true;
@@ -71,7 +71,7 @@ class XmlParserUtils {
         }
         try {
             String strValue = element.getAttribute(attributeName);
-            if (!Strings.isNullOrEmpty(strValue)) {
+            if (!StringUtils.isEmpty(strValue)) {
                 return Boolean.parseBoolean(strValue);
             }
             return defaultValue;
@@ -87,7 +87,7 @@ class XmlParserUtils {
         }
         try {
             String strValue = element.getAttribute(attributeName);
-            if (!Strings.isNullOrEmpty(strValue)) {
+            if (!StringUtils.isEmpty(strValue)) {
                 return Long.parseLong(strValue);
             }
             return defaultValue;
@@ -103,7 +103,7 @@ class XmlParserUtils {
             return defaultValue;
         }
         String strValue = element.getAttribute(attributeName);
-        if (!Strings.isNullOrEmpty(strValue)) {
+        if (!StringUtils.isEmpty(strValue)) {
             return strValue;
         }
         return defaultValue;
@@ -119,7 +119,7 @@ class XmlParserUtils {
                 return null;
             }
             String strValue = node.getTextContent();
-            if (!Strings.isNullOrEmpty(strValue)) {
+            if (!StringUtils.isEmpty(strValue)) {
                 return Long.parseLong(strValue);
             }
             return null;

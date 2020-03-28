@@ -21,21 +21,21 @@
 
 package com.microsoft.applicationinsights.internal.perfcounter;
 
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import com.microsoft.applicationinsights.TelemetryClient;
+import com.microsoft.applicationinsights.common.Preconditions;
 import com.microsoft.applicationinsights.extensibility.PerformanceCountersCollectionPlugin;
 import com.microsoft.applicationinsights.internal.logger.InternalLogger;
 import com.microsoft.applicationinsights.internal.shutdown.SDKShutdownActivity;
 import com.microsoft.applicationinsights.internal.shutdown.Stoppable;
 import com.microsoft.applicationinsights.internal.util.ThreadPoolUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 
 /**
  * The class serves as the container of all {@link com.microsoft.applicationinsights.internal.perfcounter.PerformanceCounter}
@@ -88,7 +88,7 @@ public enum PerformanceCounterContainer implements Stoppable {
      */
     public boolean register(PerformanceCounter performanceCounter) {
         Preconditions.checkNotNull(performanceCounter, "performanceCounter should be non null, non empty value");
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(performanceCounter.getId()), "performanceCounter's id should be non null, non empty value");
+        Preconditions.checkArgument(!StringUtils.isEmpty(performanceCounter.getId()), "performanceCounter's id should be non null, non empty value");
 
         initialize();
 
@@ -117,7 +117,7 @@ public enum PerformanceCounterContainer implements Stoppable {
      * @param id The Performance Counter's id.
      */
     public void unregister(String id) {
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(id), "id should be non null, non empty value");
+        Preconditions.checkArgument(!StringUtils.isEmpty(id), "id should be non null, non empty value");
 
         InternalLogger.INSTANCE.trace("Un-registering PC '%s'", id);
         performanceCounters.remove(id);

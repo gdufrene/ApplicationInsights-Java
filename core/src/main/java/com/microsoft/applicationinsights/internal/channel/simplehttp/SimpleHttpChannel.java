@@ -21,24 +21,17 @@
 
 package com.microsoft.applicationinsights.internal.channel.simplehttp;
 
-import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import org.springframework.web.reactive.function.client.WebClient;
 
 import com.microsoft.applicationinsights.channel.TelemetryChannel;
 import com.microsoft.applicationinsights.channel.TelemetrySampler;
 import com.microsoft.applicationinsights.internal.logger.InternalLogger;
 import com.microsoft.applicationinsights.telemetry.JsonTelemetryDataSerializer;
 import com.microsoft.applicationinsights.telemetry.Telemetry;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 
 /**
  * A simple HTTP channel, using no buffering, batching, or asynchrony.
@@ -65,40 +58,31 @@ final class SimpleHttpChannel implements TelemetryChannel
     @Override
     public void send(Telemetry item)
     {
-        try
-        {
             // Establish the payload.
             StringWriter writer = new StringWriter();
-//            item.serialize(new JsonWriter(writer));
-            item.serialize(new JsonTelemetryDataSerializer(writer));
+            try {
+	            item.serialize(new JsonTelemetryDataSerializer(writer));
+	
+	            // Send it.
+	            String payload = writer.toString();
+	            if (developerMode) {
+	                InternalLogger.INSTANCE.trace("SimpleHttpChannel, payload: %s", payload);
+	            }
+	
+	            int code = WebClient.create(DEFAULT_SERVER_URI)
+	            	.post()
+	            	.syncBody(payload)
+	            	.header("Content-Type", "application/x-json-stream")
+	            	.exchange()
+	            	.block()
+	            	.statusCode()
+	            	.value();
+	            
+	            if (developerMode) {
+	            	InternalLogger.INSTANCE.trace("SimpleHttpChannel, response: %s", code);
+	            }
+            } catch (Exception e) { e.printStackTrace(); }
 
-            // Send it.
-
-            String payload = writer.toString();
-
-            if (developerMode) {
-                InternalLogger.INSTANCE.trace("SimpleHttpChannel, payload: %s", payload);
-            }
-
-            HttpPost request = new HttpPost(DEFAULT_SERVER_URI);
-            StringEntity body = new StringEntity(payload, ContentType.create("application/x-json-stream"));
-            request.setEntity(body);
-
-            try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-                try (CloseableHttpResponse response = httpClient.execute(request)) {
-                    HttpEntity respEntity = response.getEntity();
-                    if (respEntity != null)
-                        respEntity.getContent().close();
-
-                    if (developerMode) {
-                        InternalLogger.INSTANCE.trace("SimpleHttpChannel, response: %s", response.getStatusLine());
-                    }
-                } // response
-            } // httpclient
-        }
-        catch (IOException ioe)
-        {
-        }
     }
 
     @Override

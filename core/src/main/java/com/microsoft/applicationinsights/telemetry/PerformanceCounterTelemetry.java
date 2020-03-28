@@ -21,8 +21,10 @@
 
 package com.microsoft.applicationinsights.telemetry;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.microsoft.applicationinsights.common.Preconditions;
 import com.microsoft.applicationinsights.internal.schemav2.PerformanceCounterData;
 
 /**
@@ -57,8 +59,8 @@ public final class PerformanceCounterTelemetry extends BaseTelemetry<Performance
      * @param value The value of the performance counter.
      */
     public PerformanceCounterTelemetry(String categoryName, String counterName, String instanceName, double value) {
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(categoryName), "categoryName must be non null, non empty value");
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(counterName), "counterName must be non null, non empty value");
+        Preconditions.checkArgument(!StringUtils.isEmpty(categoryName), "categoryName must be non null, non empty value");
+        Preconditions.checkArgument(!StringUtils.isEmpty(counterName), "counterName must be non null, non empty value");
 
         data = new PerformanceCounterData();
         initialize(data.getProperties());

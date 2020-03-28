@@ -23,17 +23,16 @@ package com.microsoft.applicationinsights.internal.channel.common;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.zip.GZIPOutputStream;
 
+import com.microsoft.applicationinsights.common.Preconditions;
 import com.microsoft.applicationinsights.internal.channel.TelemetrySerializer;
 import com.microsoft.applicationinsights.internal.logger.InternalLogger;
 import com.microsoft.applicationinsights.telemetry.Telemetry;
-import com.microsoft.applicationinsights.telemetry.JsonTelemetryDataSerializer;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
+
 
 /**
  * The class is an implementation of the {@link TelemetrySerializer}
@@ -92,7 +91,7 @@ public final class GzipTelemetrySerializer implements TelemetrySerializer {
             InternalLogger.INSTANCE.error("Failed to serialize , exception: %s", e.toString());
         }
 
-        return Optional.fromNullable(result);
+        return Optional.ofNullable(result);
     }
 
     private boolean compress(GZIPOutputStream zipStream, Collection<String> telemetries) throws IOException {

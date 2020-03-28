@@ -21,9 +21,9 @@
 
 package com.microsoft.applicationinsights.internal.channel.common;
 
-import com.microsoft.applicationinsights.internal.logger.InternalLogger;
+import org.apache.commons.lang3.StringUtils;
 
-import com.google.common.base.Strings;
+import com.microsoft.applicationinsights.internal.logger.InternalLogger;
 
 /**
  * The class knows how to create the {@link BackOffTimesPolicy}
@@ -42,7 +42,7 @@ final class BackOffTimesPolicyFactory {
 
     public BackOffTimesPolicy create(String typeAsString) {
         BackOffPolicyType type = BackOffPolicyType.EXPONENTIAL;
-        if (Strings.isNullOrEmpty(typeAsString)) {
+        if (StringUtils.isEmpty(typeAsString)) {
             InternalLogger.INSTANCE.trace("No back-off container defined, using the default '%s'", type);
         } else {
             try {

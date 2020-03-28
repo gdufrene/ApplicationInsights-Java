@@ -21,7 +21,7 @@
 
 package com.microsoft.applicationinsights.telemetry;
 
-import com.google.common.base.Preconditions;
+import com.microsoft.applicationinsights.common.Preconditions;
 
 /**
  * This class lets its users to define an interval of time

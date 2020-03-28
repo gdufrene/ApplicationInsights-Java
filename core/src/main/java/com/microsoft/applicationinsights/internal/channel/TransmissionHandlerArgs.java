@@ -1,6 +1,5 @@
 package com.microsoft.applicationinsights.internal.channel;
 
-import org.apache.http.Header;
 
 import com.microsoft.applicationinsights.internal.channel.common.Transmission;
 
@@ -73,15 +72,15 @@ public class TransmissionHandlerArgs {
      */
     public Throwable getException() { return this.exception;}
 
-    private Header retryHeader;
+    private String retryHeader;
     /**
      * Set the Retry-After header to be passed to the handler.
      * @param head The Retry-After header
      */
-    public void setRetryHeader(Header head) { this.retryHeader = head;}
+    public void setRetryHeader(String head) { this.retryHeader = head;}
     /**
      * Get the Retry-After header to be passed to the handler.
      * @return The Retry-After header
      */
-    public Header getRetryHeader() { return this.retryHeader;}
+    public String getRetryHeader() { return this.retryHeader;}
 }

@@ -24,38 +24,37 @@ package com.microsoft.applicationinsights.internal.quickpulse;
 import java.util.Date;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.microsoft.applicationinsights.TelemetryConfiguration;
-import com.microsoft.applicationinsights.internal.util.PropertyHelper;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ByteArrayEntity;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.ClientRequest;
 
+import com.microsoft.applicationinsights.TelemetryConfiguration;
 import com.microsoft.applicationinsights.internal.logger.InternalLogger;
+import com.microsoft.applicationinsights.internal.util.PropertyHelper;
 
 /**
  * Created by gupele on 12/12/2016.
  */
 final class DefaultQuickPulseDataFetcher implements QuickPulseDataFetcher {
     private static final String QP_BASE_URI = "https://rt.services.visualstudio.com/QuickPulseService.svc";
-    private final ArrayBlockingQueue<HttpPost> sendQueue;
+    private final ArrayBlockingQueue<ClientRequest> sendQueue;
     private final TelemetryConfiguration config;
     private final String ikey;
     private final QuickPulseNetworkHelper networkHelper = new QuickPulseNetworkHelper();
     private String postPrefix;
     private final String sdkVersion;
 
-    public DefaultQuickPulseDataFetcher(ArrayBlockingQueue<HttpPost> sendQueue, TelemetryConfiguration config,
+    public DefaultQuickPulseDataFetcher(ArrayBlockingQueue<ClientRequest> sendQueue, TelemetryConfiguration config,
                                         String instanceName, String quickPulseId) {
         this(sendQueue, config, null, instanceName, quickPulseId);
     }
 
     @Deprecated
-    public DefaultQuickPulseDataFetcher(final ArrayBlockingQueue<HttpPost> sendQueue, final String ikey, final String instanceName, final String quickPulseId) {
+    public DefaultQuickPulseDataFetcher(final ArrayBlockingQueue<ClientRequest> sendQueue, final String ikey, final String instanceName, final String quickPulseId) {
         this(sendQueue, null, ikey, instanceName, quickPulseId);
     }
 
-    private DefaultQuickPulseDataFetcher(ArrayBlockingQueue<HttpPost> sendQueue, TelemetryConfiguration config, String ikey, String instanceName, String quickPulseId) {
+    private DefaultQuickPulseDataFetcher(ArrayBlockingQueue<ClientRequest> sendQueue, TelemetryConfiguration config, String ikey, String instanceName, String quickPulseId) {
         this.sendQueue = sendQueue;
         this.config = config;
         this.ikey = ikey;
@@ -88,11 +87,9 @@ final class DefaultQuickPulseDataFetcher implements QuickPulseDataFetcher {
             QuickPulseDataCollector.FinalCounters counters = QuickPulseDataCollector.INSTANCE.getAndRestart();
 
             final Date currentDate = new Date();
-            final HttpPost request = networkHelper.buildRequest(currentDate, getEndpointUrl());
-
-            final ByteArrayEntity postEntity = buildPostEntity(counters);
-
-            request.setEntity(postEntity);
+            final ClientRequest request = networkHelper.buildRequest(currentDate, getEndpointUrl())
+            		.body( BodyInserters.fromObject(buildPostEntity(counters)) )
+            		.build();
 
             if (!sendQueue.offer(request)) {
                 InternalLogger.INSTANCE.trace("Quick Pulse send queue is full");
@@ -110,7 +107,7 @@ final class DefaultQuickPulseDataFetcher implements QuickPulseDataFetcher {
         }
     }
 
-    @VisibleForTesting
+    // @VisibleForTesting
     String getEndpointUrl() {
         return getQuickPulseEndpoint() + "/post?ikey=" + getInstrumentationKey();
     }
@@ -127,7 +124,7 @@ final class DefaultQuickPulseDataFetcher implements QuickPulseDataFetcher {
         }
     }
 
-    private ByteArrayEntity buildPostEntity(QuickPulseDataCollector.FinalCounters counters) {
+    private String buildPostEntity(QuickPulseDataCollector.FinalCounters counters) {
         StringBuilder sb = new StringBuilder(postPrefix);
         formatMetrics(counters, sb);
         sb.append("\"Timestamp\": \"\\/Date(");
@@ -137,7 +134,7 @@ final class DefaultQuickPulseDataFetcher implements QuickPulseDataFetcher {
         sb.append("\"Version\": \"");
         sb.append(sdkVersion);
         sb.append("\"}]");
-        return new ByteArrayEntity(sb.toString().getBytes());
+        return sb.toString();
     }
 
     private void formatDocuments(StringBuilder sb) {

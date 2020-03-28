@@ -23,11 +23,12 @@ package com.microsoft.applicationinsights.internal.perfcounter;
 
 import java.io.File;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.microsoft.applicationinsights.common.Preconditions;
 import com.microsoft.applicationinsights.internal.logger.InternalLogger;
 import com.microsoft.applicationinsights.internal.system.SystemInformation;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 
 /**
  * A base class for Unix performance counters who uses the '/proc/' filesystem for their work.
@@ -40,7 +41,7 @@ abstract class AbstractUnixPerformanceCounter extends AbstractPerformanceCounter
 
     protected AbstractUnixPerformanceCounter(String path) {
         Preconditions.checkArgument(SystemInformation.INSTANCE.isUnix(), "This performance counter must be activated in Unix environment.");
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(path), "path should be non null, non empty value.");
+        Preconditions.checkArgument(!StringUtils.isEmpty(path), "path should be non null, non empty value.");
 
         this.path = path;
         processFile = new File(path);

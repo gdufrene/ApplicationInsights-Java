@@ -21,19 +21,16 @@
 
 package com.microsoft.applicationinsights.internal.channel.common;
 
-import com.microsoft.applicationinsights.internal.logger.InternalLogger;
-import com.microsoft.applicationinsights.internal.reflect.ClassDataUtils;
+import static org.junit.Assert.assertNotNull;
 
-/**
- * Created by gupele on 6/4/2015.
- */
-public enum ApacheSenderFactory {
-    INSTANCE;
+import java.io.IOException;
 
-    private ApacheSender apacheSender = ApacheSender43.create();
+import org.junit.Test;
 
-    public synchronized ApacheSender create() {
-        InternalLogger.INSTANCE.trace("Using Http Client version 4.3+");
-        return apacheSender;
+public final class SenderTest {
+    @Test
+    public void testHttpClientType() throws IOException {
+    	HttpSender tested = HttpSenderFactory.INSTANCE.create();
+        assertNotNull(tested);
     }
 }

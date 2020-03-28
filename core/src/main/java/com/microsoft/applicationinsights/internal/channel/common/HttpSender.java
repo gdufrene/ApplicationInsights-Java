@@ -23,25 +23,18 @@ package com.microsoft.applicationinsights.internal.channel.common;
 
 import java.io.IOException;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
+import org.springframework.web.reactive.function.client.ClientRequest;
+import org.springframework.web.reactive.function.client.ClientResponse;
 
 /**
  * Created by gupele on 6/4/2015.
  */
-public interface ApacheSender {
+public interface HttpSender {
     final static int DEFAULT_MAX_TOTAL_CONNECTIONS = 200;
     final static int REQUEST_TIMEOUT_IN_MILLIS = 60000;
     final static int DEFAULT_MAX_CONNECTIONS_PER_ROUTE = 20;
 
-    HttpResponse sendPostRequest(HttpPost post) throws IOException;
+    ClientResponse sendPostRequest(ClientRequest post) throws IOException;
 
-    void dispose(HttpResponse response);
-
-    void close();
-
-    HttpClient getHttpClient();
-
-    void enhanceRequest(HttpPost request);
+    void enhanceRequest(ClientRequest request);
 }

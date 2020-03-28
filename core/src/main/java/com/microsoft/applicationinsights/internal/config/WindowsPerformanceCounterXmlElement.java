@@ -21,23 +21,27 @@
 
 package com.microsoft.applicationinsights.internal.config;
 
-import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 
 /**
  * Created by gupele on 3/30/2015.
  */
+@XmlAccessorType(XmlAccessType.FIELD)
 public class WindowsPerformanceCounterXmlElement {
 
-    @XStreamAsAttribute
+	@XmlAttribute
     private String displayName;
 
-    @XStreamAsAttribute
+	@XmlAttribute
     private String categoryName;
 
-    @XStreamAsAttribute
+	@XmlAttribute
     private String counterName;
 
-    @XStreamAsAttribute
+	@XmlAttribute
     private String instanceName;
 
     public String getDisplayName() {

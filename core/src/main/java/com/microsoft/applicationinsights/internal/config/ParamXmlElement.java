@@ -21,17 +21,20 @@
 
 package com.microsoft.applicationinsights.internal.config;
 
-import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 
 /**
  * Created by yonisha on 3/16/2015.
  */
+@XmlAccessorType(XmlAccessType.FIELD)
 public class ParamXmlElement {
 
-    @XStreamAsAttribute
+    @XmlAttribute
     private String name;
 
-    @XStreamAsAttribute
+    @XmlAttribute
     private String value;
 
     public String getName() {

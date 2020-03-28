@@ -1,0 +1,98 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	
+	
+	<parent>
+		<groupId>fr.gdufrene</groupId>
+		<artifactId>applicationinsights-java</artifactId>
+		<version>2.6.0-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>applicationinsights-core</artifactId>
+
+<dependencies>
+
+<dependency>
+	<groupId>${project.groupId}</groupId>
+	<artifactId>applicationinsights-internal-logger</artifactId>
+	<version>${project.version}</version>
+</dependency>
+
+<dependency>
+	<groupId>${project.groupId}</groupId>
+	<artifactId>applicationinsights-agent</artifactId>
+	<version>${project.version}</version>
+	<optional>true</optional>
+</dependency>
+
+<dependency>
+	<groupId>commons-io</groupId>
+	<artifactId>commons-io</artifactId>
+</dependency>
+	
+<dependency>
+    <groupId>org.apache.commons</groupId>
+    <artifactId>commons-lang3</artifactId>
+</dependency>
+
+<dependency>
+    <groupId>com.google.code.findbugs</groupId>
+    <artifactId>jsr305</artifactId>
+    <optional>true</optional>
+</dependency>
+
+<dependency>
+    <groupId>io.projectreactor.netty</groupId>
+    <artifactId>reactor-netty</artifactId>
+    <version>0.9.6.RELEASE</version>
+</dependency>
+
+
+<dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-context</artifactId>
+</dependency>
+
+<dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-webflux</artifactId>
+</dependency>
+
+<dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-databind</artifactId>
+</dependency>
+
+	<!-- Test dependencies -->
+	<dependency>
+	    <groupId>org.junit.vintage</groupId>
+	    <artifactId>junit-vintage-engine</artifactId>
+	    <version>5.6.1</version>
+	    <scope>test</scope>
+	</dependency>
+	<dependency>
+	    <groupId>org.hamcrest</groupId>
+	    <artifactId>hamcrest-library</artifactId>
+	    <version>2.2</version>
+	    <scope>test</scope>
+	</dependency>
+	<dependency>
+		<groupId>org.mockito</groupId>
+		<artifactId>mockito-core</artifactId>
+		<version>3.3.3</version>
+		<scope>test</scope>
+	</dependency>
+
+</dependencies>
+
+<build>
+	<resources>
+		<resource>
+			<directory>src/main/resources</directory>
+			<filtering>true</filtering>
+		</resource>
+	</resources>
+</build>
+	
+</project>

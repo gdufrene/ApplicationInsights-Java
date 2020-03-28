@@ -27,8 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import com.google.common.base.Strings;
-import org.apache.http.annotation.Obsolete;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Created by gupele on 1/7/2015.
@@ -48,7 +47,7 @@ public final class Sanitizer {
 
     private final static String INVALID_NAME_CHARACTERS = "[^0-9a-zA-Z-._()\\/ ]";
 
-    @Obsolete
+    @Deprecated
     public static void sanitizeProperties(Map<String, String> map) {
         if (map != null) {
             HashMap<String, String> tempMap = new HashMap<String, String>(map.size());
@@ -64,7 +63,7 @@ public final class Sanitizer {
         }
     }
 
-    @Obsolete
+    @Deprecated
     public static void sanitizeMeasurements(Map<String, Double> map) {
         if (map != null) {
             HashMap<String, Double> tempMap = new HashMap<String, Double>(map.size());
@@ -80,7 +79,7 @@ public final class Sanitizer {
     }
 
     public static URI sanitizeUri(String urlAsString) {
-        if (!Strings.isNullOrEmpty(urlAsString)) {
+        if (!StringUtils.isEmpty(urlAsString)) {
 
             if (urlAsString.length() > MAX_URL_LENGTH) {
                 urlAsString = urlAsString.substring(0, MAX_URL_LENGTH);
@@ -100,24 +99,24 @@ public final class Sanitizer {
         return null;
     }
 
-    @Obsolete
+    @Deprecated
     public static String sanitizeValue(String value) {
         String truncatedString = trimAndTruncate(value, MAX_VALUE_LENGTH);
         String sanitizedString = sanitizeStringForJSON(truncatedString, MAX_VALUE_LENGTH);
         return sanitizedString;
     }
 
-    @Obsolete
+    @Deprecated
     public static String sanitizeName(String name) {
         return trimAndTruncate(name, MAX_NAME_LENGTH);
     }
 
-    @Obsolete
+    @Deprecated
     public static String sanitizeMessage(String message) {
         return trimAndTruncate(message, MAX_MESSAGE_LENGTH);
     }
 
-    @Obsolete
+    @Deprecated
     public static boolean isUUID(String possibleUUID) {
         try {
             UUID.fromString(possibleUUID);
@@ -129,7 +128,7 @@ public final class Sanitizer {
     }
 
     public static URI safeStringToUri(String url) {
-        if (Strings.isNullOrEmpty(url)) {
+        if (StringUtils.isEmpty(url)) {
             return null;
         }
 
@@ -142,7 +141,7 @@ public final class Sanitizer {
         return result;
     }
 
-    @Obsolete
+    @Deprecated
     private static <V> String sanitizeKey(String key, Map<String, V> map) {
         String sanitizedKey = trimAndTruncate(key, MAX_MAP_NAME_LENGTH);
         sanitizedKey = sanitizeStringForJSON(sanitizedKey, MAX_MAP_NAME_LENGTH);
@@ -151,7 +150,7 @@ public final class Sanitizer {
         return sanitizedKey;
     }
 
-    @Obsolete
+    @Deprecated
     private static String trimAndTruncate(String value, int maxLength) {
         if (value == null) {
             return value;
@@ -165,12 +164,12 @@ public final class Sanitizer {
         return sanitized;
     }
 
-    @Obsolete
+    @Deprecated
     private static String MakeKeyNonEmpty(String key) {
-        return Strings.isNullOrEmpty(key) ? "(required property name is empty)" : key;
+        return StringUtils.isEmpty(key) ? "(required property name is empty)" : key;
     }
 
-    @Obsolete
+    @Deprecated
     private static <V> String MakeKeyUnique(String key, Map<String, V> map)
     {
         if (map.containsKey(key)) {
@@ -187,12 +186,12 @@ public final class Sanitizer {
         return key;
     }
 
-    @Obsolete
+    @Deprecated
     private static String truncate(String value, int maxLength) {
         return value.length() > maxLength ? value.substring(0, maxLength) : value;
     }
 
-    @Obsolete
+    @Deprecated
     private static String sanitizeStringForJSON(String text, int maxLength) {
 
         final StringBuilder result = new StringBuilder();

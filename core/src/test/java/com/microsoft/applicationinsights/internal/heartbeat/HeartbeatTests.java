@@ -190,7 +190,7 @@ public class HeartbeatTests {
         .then(new Answer<Boolean>() {
               @Override
               public Boolean answer(InvocationOnMock invocation) throws Throwable {
-                        props.put(invocation.getArgumentAt(0, String.class), invocation.getArgumentAt(1, String.class));
+                        props.put(invocation.getArgument(0, String.class), invocation.getArgument(1, String.class));
                         return true;
                       }
             });
@@ -265,7 +265,7 @@ public class HeartbeatTests {
         .then(new Answer<Boolean>() {
           @Override
           public Boolean answer(InvocationOnMock invocation) throws Throwable {
-            props.put(invocation.getArgumentAt(0, String.class), invocation.getArgumentAt(1, String.class));
+            props.put(invocation.getArgument(0, String.class), invocation.getArgument(1, String.class));
             return true;
           }
         });

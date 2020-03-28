@@ -21,10 +21,10 @@
 
 package com.microsoft.applicationinsights.internal.perfcounter;
 
-import com.microsoft.applicationinsights.internal.logger.InternalLogger;
+import org.apache.commons.lang3.StringUtils;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
+import com.microsoft.applicationinsights.common.Preconditions;
+import com.microsoft.applicationinsights.internal.logger.InternalLogger;
 
 /**
  * Created by gupele on 3/30/2015.
@@ -73,19 +73,19 @@ public final class WindowsPerformanceCounterData {
     }
 
     public WindowsPerformanceCounterData setDisplayName(String displayName) {
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(displayName), "displayName must be non-null and non empty value.");
+        Preconditions.checkArgument(!StringUtils.isEmpty(displayName), "displayName must be non-null and non empty value.");
         this.displayName = displayName;
         return this;
     }
 
     public WindowsPerformanceCounterData setCategoryName(String categoryName) {
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(categoryName), "categoryName must be non-null and non empty value.");
+        Preconditions.checkArgument(!StringUtils.isEmpty(categoryName), "categoryName must be non-null and non empty value.");
         this.categoryName = categoryName;
         return this;
     }
 
     public WindowsPerformanceCounterData setCounterName(String counterName) {
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(counterName), "counterName must be non-null and non empty value.");
+        Preconditions.checkArgument(!StringUtils.isEmpty(counterName), "counterName must be non-null and non empty value.");
         this.counterName = counterName;
         return this;
     }

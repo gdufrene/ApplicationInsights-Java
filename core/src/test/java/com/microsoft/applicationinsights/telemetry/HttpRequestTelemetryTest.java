@@ -23,7 +23,7 @@ package com.microsoft.applicationinsights.telemetry;
 
 import java.util.Date;
 import org.junit.Test;
-import org.apache.http.HttpStatus;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -35,7 +35,7 @@ public final class HttpRequestTelemetryTest {
         RequestTelemetry requestTelemetry = new RequestTelemetry();
 
         assertNotNull(requestTelemetry.getTimestamp());
-        assertEquals(Integer.toString(HttpStatus.SC_OK), requestTelemetry.getResponseCode());
+        assertEquals("200", requestTelemetry.getResponseCode());
         assertTrue(requestTelemetry.isSuccess());
     }
 

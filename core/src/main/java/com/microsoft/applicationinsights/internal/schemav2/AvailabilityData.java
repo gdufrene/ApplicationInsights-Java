@@ -23,15 +23,11 @@
 */
 package com.microsoft.applicationinsights.internal.schemav2;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentHashMap;
-import com.microsoft.applicationinsights.telemetry.JsonSerializable;
+import java.util.concurrent.ConcurrentMap;
+
 import com.microsoft.applicationinsights.telemetry.Duration;
 import com.microsoft.applicationinsights.telemetry.JsonTelemetryDataSerializer;
-import com.google.common.base.Preconditions;
 
 /**
  * Data contract class AvailabilityData.

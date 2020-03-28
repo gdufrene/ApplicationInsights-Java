@@ -30,16 +30,16 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.zip.GZIPInputStream;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.applicationinsights.telemetry.JsonTelemetryDataSerializer;
 import com.microsoft.applicationinsights.telemetry.Telemetry;
 import org.junit.Test;
 
 import com.microsoft.applicationinsights.telemetry.TelemetryContext;
-
-import com.google.common.base.Optional;
-import com.google.gson.Gson;
 
 
 import static org.junit.Assert.assertEquals;
@@ -49,11 +49,14 @@ import static org.junit.Assert.fail;
 
 public final class GzipTelemetrySerializerTest {
     private static class StubTelemetry implements Telemetry {
-        private final String telemetryName;
+        private String telemetryName;
 
-        private final TelemetryContext context = new TelemetryContext();
+        private TelemetryContext context = new TelemetryContext();
 
-        private final HashMap<String, String> properties;
+        private HashMap<String, String> properties;
+        
+        @SuppressWarnings("unused")
+		public StubTelemetry() {}
 
         public StubTelemetry(String telemetryName, HashMap<String, String> properties) {
             this.telemetryName = telemetryName;
@@ -202,9 +205,11 @@ public final class GzipTelemetrySerializerTest {
 
             assertEquals(stubStrings.length, amount);
 
-            Gson gson = new Gson();
+            ObjectMapper mapper = new ObjectMapper()
+            		.disable(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES)
+            		.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
             for (String stubString : stubStrings) {
-                StubTelemetry stubTelemetry = gson.fromJson(stubString, StubTelemetry.class);
+                StubTelemetry stubTelemetry = mapper.readValue(stubString, StubTelemetry.class);
 
                 StubTelemetry expectedStub = expected.get(stubTelemetry.getTelemetryName());
                 assertNotNull(expectedStub);

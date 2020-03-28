@@ -1,8 +1,9 @@
 package com.microsoft.applicationinsights.internal.util;
 
-import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
+
 import com.microsoft.applicationinsights.internal.logger.InternalLogger;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import javax.net.ssl.SSLContext;
@@ -10,6 +11,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SSLOptionsUtil {
 
@@ -58,14 +62,18 @@ public class SSLOptionsUtil {
             return defaultSupportedProtocols();
         }
 
-        if (Strings.isNullOrEmpty(rawProp)) {
+        if (StringUtils.isEmpty(rawProp)) {
             if (InternalLogger.INSTANCE.isWarnEnabled()) {
                 InternalLogger.INSTANCE.warn("%s specifies no protocols; using defaults: %s", APPLICATION_INSIGHTS_SSL_PROTOCOLS_PROPERTY, Arrays.toString(DEFAULT_SUPPORTED_PROTOCOLS));
             }
             return defaultSupportedProtocols();
         }
 
-        String[] customProtocols = filterSupportedProtocols(Splitter.on(',').trimResults().omitEmptyStrings().split(rawProp), true);
+        List<String> protocols = Stream.of( StringUtils.split(rawProp, ',') )
+        	.map( String::trim )
+        	.filter( StringUtils::isNotEmpty )
+        	.collect( Collectors.toList() );
+        String[] customProtocols = filterSupportedProtocols(protocols, true);
         if (customProtocols.length == 0) {
             if (InternalLogger.INSTANCE.isErrorEnabled()) {
                 InternalLogger.INSTANCE.error("%s contained no supported protocols: '%s'; using default: %s", APPLICATION_INSIGHTS_SSL_PROTOCOLS_PROPERTY, rawProp, Arrays.toString(DEFAULT_SUPPORTED_PROTOCOLS));

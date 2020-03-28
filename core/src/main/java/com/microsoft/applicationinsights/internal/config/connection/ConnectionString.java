@@ -1,20 +1,20 @@
 package com.microsoft.applicationinsights.internal.config.connection;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
-import com.microsoft.applicationinsights.TelemetryConfiguration;
-import com.microsoft.applicationinsights.internal.logger.InternalLogger;
-import org.apache.commons.lang3.StringUtils;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.microsoft.applicationinsights.TelemetryConfiguration;
+import com.microsoft.applicationinsights.common.Preconditions;
+import com.microsoft.applicationinsights.internal.logger.InternalLogger;
+
 public class ConnectionString {
 
-    @VisibleForTesting
+    // @VisibleForTesting
     static final int CONNECTION_STRING_MAX_LENGTH = 4096;
 
     private ConnectionString(){}
@@ -27,7 +27,14 @@ public class ConnectionString {
         final Map<String, String> kvps;
         try {
             kvps = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-            kvps.putAll(Splitter.on(';').trimResults().omitEmptyStrings().withKeyValueSeparator('=').split(connectionString));
+            for ( String str : StringUtils.split(connectionString, ';') ) {
+        		String key = StringUtils.substringBefore(str, "=").trim();
+        		if ( StringUtils.isEmpty(key) ) continue;
+        		String value = StringUtils.substringAfter(str, "=").trim();
+        		if ( !StringUtils.isEmpty(value) && value.charAt(0) == '=' ) 
+        			throw new InvalidConnectionStringException("Invalid value in connection string");
+        		kvps.put(key, value);
+            }
         } catch (IllegalArgumentException e) {
             throw new InvalidConnectionStringException("Could not parse connection string.");
         }
@@ -39,17 +46,17 @@ public class ConnectionString {
 
         // get ikey
         String instrumentationKey = kvps.get(Keywords.INSTRUMENTATION_KEY);
-        if (Strings.isNullOrEmpty(instrumentationKey)) {
+        if (StringUtils.isEmpty(instrumentationKey)) {
             throw new InvalidConnectionStringException("Missing '"+Keywords.INSTRUMENTATION_KEY+"'");
         }
-        if (!Strings.isNullOrEmpty(config.getInstrumentationKey())) {
+        if (!StringUtils.isEmpty(config.getInstrumentationKey())) {
             InternalLogger.INSTANCE.warn("Connection string is overriding previously configured instrumentation key.");
         }
         config.setInstrumentationKey(instrumentationKey);
 
         // resolve suffix
         String suffix = kvps.get(Keywords.ENDPOINT_SUFFIX);
-        if (!Strings.isNullOrEmpty(suffix)) {
+        if (!StringUtils.isEmpty(suffix)) {
             try {
                 config.getEndpointProvider().setIngestionEndpoint(constructSecureEndpoint(EndpointPrefixes.INGESTION_ENDPOINT_PREFIX, suffix));
                 config.getEndpointProvider().setLiveEndpoint(constructSecureEndpoint(EndpointPrefixes.LIVE_ENDPOINT_PREFIX, suffix));
@@ -62,22 +69,22 @@ public class ConnectionString {
 
         // set explicit endpoints
         String liveEndpoint = kvps.get(Keywords.LIVE_ENDPOINT);
-        if (!Strings.isNullOrEmpty(liveEndpoint)) {
+        if (!StringUtils.isEmpty(liveEndpoint)) {
             config.getEndpointProvider().setLiveEndpoint(toUriOrThrow(liveEndpoint, Keywords.LIVE_ENDPOINT));
         }
 
         String ingestionEndpoint = kvps.get(Keywords.INGESTION_ENDPOINT);
-        if (!Strings.isNullOrEmpty(ingestionEndpoint)) {
+        if (!StringUtils.isEmpty(ingestionEndpoint)) {
             config.getEndpointProvider().setIngestionEndpoint(toUriOrThrow(ingestionEndpoint, Keywords.INGESTION_ENDPOINT));
         }
 
         String profilerEndpoint = kvps.get(Keywords.PROFILER_ENDPOINT);
-        if (!Strings.isNullOrEmpty(profilerEndpoint)) {
+        if (!StringUtils.isEmpty(profilerEndpoint)) {
             config.getEndpointProvider().setProfilerEndpoint(toUriOrThrow(profilerEndpoint, Keywords.PROFILER_ENDPOINT));
         }
 
         String snapshotEndpoint = kvps.get(Keywords.SNAPSHOT_ENDPOINT);
-        if (!Strings.isNullOrEmpty(snapshotEndpoint)) {
+        if (!StringUtils.isEmpty(snapshotEndpoint)) {
             config.getEndpointProvider().setSnapshotEndpoint(toUriOrThrow(snapshotEndpoint, Keywords.SNAPSHOT_ENDPOINT));
         }
     }
@@ -96,7 +103,7 @@ public class ConnectionString {
         }
     }
 
-    @VisibleForTesting
+    // @VisibleForTesting
     static URI constructSecureEndpoint(String prefix, String suffix) throws URISyntaxException {
         return new URI("https://" + StringUtils.strip(prefix, ".") + "." + StringUtils.strip(suffix, "."));
     }
@@ -104,7 +111,7 @@ public class ConnectionString {
     /**
      * All tokens are lowercase. Parsing should be case insensitive.
      */
-    @VisibleForTesting
+    // @VisibleForTesting
     static class Keywords {
         private Keywords(){}
 
@@ -117,7 +124,7 @@ public class ConnectionString {
         static final String SNAPSHOT_ENDPOINT = "SnapshotEndpoint";
     }
 
-    @VisibleForTesting
+    // @VisibleForTesting
     static class EndpointPrefixes {
         private EndpointPrefixes(){}
 

@@ -6,14 +6,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.http.HttpStatus;
+import org.springframework.http.HttpStatus;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.common.base.Optional;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.applicationinsights.internal.channel.TransmissionHandler;
 import com.microsoft.applicationinsights.internal.channel.TransmissionHandlerArgs;
 import com.microsoft.applicationinsights.internal.logger.InternalLogger;
@@ -55,49 +55,45 @@ public class PartialSuccessHandler implements TransmissionHandler {
      * @return Returns a pass/fail for handling this transmission.
      */
     boolean validateTransmissionAndSend(TransmissionHandlerArgs args) {
-        if (args.getTransmission() != null && args.getTransmissionDispatcher() != null) {
-            switch (args.getResponseCode()) {
-            case HttpStatus.SC_PARTIAL_CONTENT:
-                BackendResponse backendResponse = getBackendResponse(args.getResponseBody());
-                List<String> originalItems = generateOriginalItems(args);
+        if (args.getTransmission() == null || args.getTransmissionDispatcher() == null) return false;
+        	
+    	if ( args.getResponseCode() != HttpStatus.PARTIAL_CONTENT.value() ) {
+            InternalLogger.INSTANCE.trace("Http response code %s not handled by %s", args.getResponseCode(),
+                    this.getClass().getName());
+            return false;
+    	}
+	
+        BackendResponse backendResponse = getBackendResponse(args.getResponseBody());
+        List<String> originalItems = generateOriginalItems(args);
 
-                // Somehow the amount of items received and the items sent do not match
-                if (backendResponse != null && (originalItems.size() != backendResponse.itemsReceived)) {
-                    InternalLogger.INSTANCE.trace(
-                            "Skipping partial content handler due to itemsReceived being larger than the items sent.");
-                    return false;
-                }
-
-                if (backendResponse != null && (backendResponse.itemsAccepted < backendResponse.itemsReceived)) {
-                    List<String> newTransmission = new ArrayList<String>();
-                    for (BackendResponse.Error e : backendResponse.errors) {
-                        switch (e.statusCode) {
-                        case TransmissionSendResult.REQUEST_TIMEOUT:
-                        case TransmissionSendResult.INTERNAL_SERVER_ERROR:
-                        case TransmissionSendResult.SERVICE_UNAVAILABLE:
-                        case TransmissionSendResult.THROTTLED:
-                        case TransmissionSendResult.THROTTLED_OVER_EXTENDED_TIME:
-                            // Unknown condition where backend response returns an index greater than the
-                            // items we're returning
-                            if (e.index < originalItems.size()) {
-                                newTransmission.add(originalItems.get(e.index));
-                            }
-                            break;
-                        }
-                    }
-                    return sendNewTransmission(args, newTransmission);
-                }
-                InternalLogger.INSTANCE
-                        .trace("Skipping partial content handler due to itemsAccepted and itemsReceived being equal.");
-                return false;
-
-            default:
-                InternalLogger.INSTANCE.trace("Http response code %s not handled by %s", args.getResponseCode(),
-                        this.getClass().getName());
-                return false;
-            }
+        // Somehow the amount of items received and the items sent do not match
+        if (backendResponse != null && (originalItems.size() != backendResponse.itemsReceived)) {
+            InternalLogger.INSTANCE.trace("Skipping partial content handler due to itemsReceived being larger than the items sent.");
+            return false;
         }
+
+        if (backendResponse != null && (backendResponse.itemsAccepted < backendResponse.itemsReceived)) {
+            List<String> newTransmission = new ArrayList<String>();
+            for (BackendResponse.Error e : backendResponse.errors) {
+                switch (e.statusCode) {
+                case TransmissionSendResult.REQUEST_TIMEOUT:
+                case TransmissionSendResult.INTERNAL_SERVER_ERROR:
+                case TransmissionSendResult.SERVICE_UNAVAILABLE:
+                case TransmissionSendResult.THROTTLED:
+                case TransmissionSendResult.THROTTLED_OVER_EXTENDED_TIME:
+                    // Unknown condition where backend response returns an index greater than the
+                    // items we're returning
+                    if (e.index < originalItems.size()) {
+                        newTransmission.add(originalItems.get(e.index));
+                    }
+                    break;
+                }
+            }
+            return sendNewTransmission(args, newTransmission);
+        }
+        InternalLogger.INSTANCE.trace("Skipping partial content handler due to itemsAccepted and itemsReceived being equal.");
         return false;
+
     }
 
     /**
@@ -174,6 +170,10 @@ public class PartialSuccessHandler implements TransmissionHandler {
         return false;
     }
 
+    private ObjectMapper mapper = new ObjectMapper()
+    		.disable(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES)
+    		.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+
     /**
      * Helper method to parse the 206 response. Uses {@link Gson}
      *
@@ -186,13 +186,9 @@ public class PartialSuccessHandler implements TransmissionHandler {
 
         BackendResponse backend = null;
         try {
-            // Parse JSON to Java
-            GsonBuilder gsonBuilder = new GsonBuilder();
-            Gson gson = gsonBuilder.create();
-            backend = gson.fromJson(response, BackendResponse.class);
+            backend = mapper.readValue(response, BackendResponse.class);
         } catch (Throwable t) {
-            InternalLogger.INSTANCE.trace(
-                    "Error deserializing backend response with Gson.%nStack Trace:%n%s",
+            InternalLogger.INSTANCE.trace("Error deserializing backend response with Jackson.%nStack Trace:%n%s",
                     ExceptionUtils.getStackTrace(t));
         } finally {
         }

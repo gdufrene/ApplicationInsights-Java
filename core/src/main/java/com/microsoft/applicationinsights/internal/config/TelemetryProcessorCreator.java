@@ -21,9 +21,10 @@
 
 package com.microsoft.applicationinsights.internal.config;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
 import com.microsoft.applicationinsights.extensibility.TelemetryProcessor;
 import com.microsoft.applicationinsights.internal.logger.InternalLogger;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 
 /**
  * The class will try to create the {@link TelemetryProcessor}

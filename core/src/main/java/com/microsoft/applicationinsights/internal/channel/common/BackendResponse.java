@@ -11,6 +11,25 @@ class BackendResponse {
     int itemsReceived;
     int itemsAccepted;
     Error[] errors;
+    
+    public int getItemsReceived() {
+		return itemsReceived;
+	}
+    public void setItemsReceived(int itemsReceived) {
+		this.itemsReceived = itemsReceived;
+	}
+    public int getItemsAccepted() {
+		return itemsAccepted;
+	}
+    public void setItemsAccepted(int itemsAccepted) {
+		this.itemsAccepted = itemsAccepted;
+	}
+    public Error[] getErrors() {
+		return errors;
+	}
+    public void setErrors(Error[] errors) {
+		this.errors = errors;
+	}
 
     static class Error {
         public int index;

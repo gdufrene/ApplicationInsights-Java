@@ -25,10 +25,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 
-import com.google.common.base.Strings;
 import com.microsoft.applicationinsights.agent.internal.sdk.SdkBridge;
 import com.microsoft.applicationinsights.agent.internal.sdk.SdkBridge.ExceptionTelemetry;
 import com.microsoft.applicationinsights.agent.internal.sdk.SdkBridge.RemoteDependencyTelemetry;
+
+import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.glowroot.instrumentation.api.Getter;
@@ -166,7 +167,7 @@ public class OutgoingSpanImpl implements Span {
                 }
                 telemetry.setTarget(target);
                 String path = uriObject.getPath();
-                if (Strings.isNullOrEmpty(path)) {
+                if (StringUtils.isEmpty(path)) {
                     telemetry.setName(method + " /");
                 } else {
                     telemetry.setName(method + " " + path);

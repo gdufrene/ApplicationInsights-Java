@@ -24,14 +24,14 @@ package com.microsoft.applicationinsights.internal.perfcounter;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.google.common.base.Preconditions;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
 import com.microsoft.applicationinsights.TelemetryClient;
+import com.microsoft.applicationinsights.common.Preconditions;
 import com.microsoft.applicationinsights.internal.logger.InternalLogger;
 import com.microsoft.applicationinsights.internal.system.SystemInformation;
 import com.microsoft.applicationinsights.telemetry.PerformanceCounterTelemetry;
-
-import com.google.common.base.Strings;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 
 /**
  * Built-in Windows performance counters that are sent as {@link com.microsoft.applicationinsights.telemetry.PerformanceCounterTelemetry}
@@ -52,7 +52,7 @@ public final class WindowsPerformanceCounterAsPC extends AbstractWindowsPerforma
      * connect to the native code. or Exception if the constructor is not called under Windows OS.
      */
     public WindowsPerformanceCounterAsPC() throws Throwable {
-        Preconditions.checkState(SystemInformation.INSTANCE.isWindows(), "Must be used under Windows OS.");
+        Preconditions.checkArgument(SystemInformation.INSTANCE.isWindows(), "Must be used under Windows OS.");
 
         register(Constants.TOTAL_CPU_PC_CATEGORY_NAME, Constants.CPU_PC_COUNTER_NAME, Constants.INSTANCE_NAME_TOTAL);
         register(Constants.TOTAL_MEMORY_PC_CATEGORY_NAME, Constants.TOTAL_MEMORY_PC_COUNTER_NAME, "");
@@ -112,7 +112,7 @@ public final class WindowsPerformanceCounterAsPC extends AbstractWindowsPerforma
      */
     private void register(String category, String counter, String instance) {
         String key = JniPCConnector.addPerformanceCounter(category, counter, instance);
-        if (!Strings.isNullOrEmpty(key)) {
+        if (!StringUtils.isEmpty(key)) {
             try {
                 WindowsPerformanceCounterData data = new WindowsPerformanceCounterData().
                         setCategoryName(category).

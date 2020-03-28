@@ -24,30 +24,33 @@ package com.microsoft.applicationinsights.internal.config;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.thoughtworks.xstream.annotations.XStreamAlias;
-import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 
 /**
  * Created by gupele on 3/15/2015.
  */
+@XmlAccessorType(XmlAccessType.FIELD)
 public class SDKLoggerXmlElement {
 
-    @XStreamAsAttribute
+    @XmlAttribute
     private String type = "CONSOLE";
 
-    @XStreamAlias("Level")
+    @XmlElement(name="Level")
     private String level;
 
-    @XStreamAlias("UniquePrefix")
+    @XmlElement(name="UniquePrefix")
     private String uniquePrefix;
 
-    @XStreamAlias("BaseFolderPath")
+    @XmlElement(name="BaseFolderPath")
     private String baseFolderPath;
 
-    @XStreamAlias("NumberOfFiles")
+    @XmlElement(name="NumberOfFiles")
     private String numberOfFiles;
 
-    @XStreamAlias("NumberOfTotalSizeInMB")
+    @XmlElement(name="NumberOfTotalSizeInMB")
     private String numberOfTotalSizeInMB;
 
     public String getType() {

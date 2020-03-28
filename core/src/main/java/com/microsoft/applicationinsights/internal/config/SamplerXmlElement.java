@@ -21,17 +21,20 @@
 
 package com.microsoft.applicationinsights.internal.config;
 
-import com.thoughtworks.xstream.annotations.XStreamAlias;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 
 /**
  * Created by gupele on 11/2/2016.
  */
+@XmlAccessorType(XmlAccessType.FIELD)
 public class SamplerXmlElement {
 
-    @XStreamAlias("Fixed")
+	@XmlElement(name="Fixed")
     private FixedSamplerXmlElement fixedSamplerXmlElement;
 
-    @XStreamAlias("Adaptive")
+	@XmlElement(name="Adaptive")
     private AdaptiveSamplerXmlElement adaptiveSamplerXmlElement;
 
     public FixedSamplerXmlElement getFixedSamplerXmlElement() {

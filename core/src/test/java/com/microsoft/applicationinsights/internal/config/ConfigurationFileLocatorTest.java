@@ -23,6 +23,8 @@ package com.microsoft.applicationinsights.internal.config;
 
 import org.junit.*;
 
+import com.microsoft.applicationinsights.internal.logger.InternalLogger;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,6 +34,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -68,8 +72,9 @@ public final class ConfigurationFileLocatorTest {
 
     @Test
     public void testGetConfigurationFileWhereDirIsFromProperty() throws Exception {
-        System.setProperty(ConfigurationFileLocator.CONFIG_DIR_PROPERTY, "src/test/resources");
-
+        //System.setProperty(ConfigurationFileLocator.CONFIG_DIR_PROPERTY, "src/test/resources");
+    	System.setProperty(ConfigurationFileLocator.CONFIG_DIR_PROPERTY, "target/test-classes");
+    	
         InputStream resourceFile = new ConfigurationFileLocator(EXISTING_CONF_TEST_FILE).getConfigurationFile();
         assertStreamNotNullAndCloseIt(resourceFile);
     }

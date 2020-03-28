@@ -2,12 +2,15 @@ package com.microsoft.applicationinsights.internal.config;
 
 import java.util.List;
 
-import com.thoughtworks.xstream.annotations.XStreamAlias;
-import com.thoughtworks.xstream.annotations.XStreamImplicit;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlList;
 
 /**
  * This class is used to bind the xml array list of {@code <IncludeTypes>}
  */
+@XmlAccessorType(XmlAccessType.FIELD)
 public class ParamIncludedTypeXmlElement {
 
     public List<String> getIncludedType() {
@@ -18,6 +21,7 @@ public class ParamIncludedTypeXmlElement {
         this.includedType = includedType;
     }
 
-    @XStreamImplicit(itemFieldName = "IncludedType")
+    @XmlElement(name="IncludedType")
+    @XmlList
     private List<String> includedType;
 }

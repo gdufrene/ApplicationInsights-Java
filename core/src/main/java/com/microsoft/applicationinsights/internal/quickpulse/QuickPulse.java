@@ -27,16 +27,16 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import com.google.common.base.Preconditions;
-import com.microsoft.applicationinsights.internal.util.DeviceInfo;
-import com.microsoft.applicationinsights.internal.util.LocalStringsUtils;
-import org.apache.http.client.methods.HttpPost;
+import org.springframework.web.reactive.function.client.ClientRequest;
 
 import com.microsoft.applicationinsights.TelemetryConfiguration;
-import com.microsoft.applicationinsights.internal.channel.common.ApacheSender;
-import com.microsoft.applicationinsights.internal.channel.common.ApacheSenderFactory;
+import com.microsoft.applicationinsights.common.Preconditions;
+import com.microsoft.applicationinsights.internal.channel.common.HttpSender;
+import com.microsoft.applicationinsights.internal.channel.common.HttpSenderFactory;
 import com.microsoft.applicationinsights.internal.shutdown.SDKShutdownActivity;
 import com.microsoft.applicationinsights.internal.shutdown.Stoppable;
+import com.microsoft.applicationinsights.internal.util.DeviceInfo;
+import com.microsoft.applicationinsights.internal.util.LocalStringsUtils;
 
 /**
  * Created by gupele on 12/4/2016.
@@ -58,7 +58,7 @@ public enum QuickPulse implements Stoppable {
     }
 
     public void initialize(final TelemetryConfiguration configuration) {
-        Preconditions.checkNotNull(configuration);
+        Preconditions.checkNotNull(configuration, "configuration is null");
         final CountDownLatch latch = new CountDownLatch(1);
         Executors.newSingleThreadExecutor().execute(new Runnable() {
             @Override
@@ -83,8 +83,8 @@ public enum QuickPulse implements Stoppable {
                 if (!initialized) {
                     initialized = true;
                     final String quickPulseId = UUID.randomUUID().toString().replace("-", "");
-                    ApacheSender apacheSender = ApacheSenderFactory.INSTANCE.create();
-                    ArrayBlockingQueue<HttpPost> sendQueue = new ArrayBlockingQueue<HttpPost>(256, true);
+                    HttpSender apacheSender = HttpSenderFactory.INSTANCE.create();
+                    ArrayBlockingQueue<ClientRequest> sendQueue = new ArrayBlockingQueue<>(256, true);
 
                     quickPulseDataSender = new DefaultQuickPulseDataSender(apacheSender, sendQueue);
 

@@ -25,23 +25,31 @@ import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
+import com.microsoft.applicationinsights.channel.TelemetryChannel;
 import com.microsoft.applicationinsights.common.CommonUtils;
 import com.microsoft.applicationinsights.extensibility.ContextInitializer;
 import com.microsoft.applicationinsights.extensibility.TelemetryInitializer;
 import com.microsoft.applicationinsights.extensibility.TelemetryProcessor;
-import com.microsoft.applicationinsights.extensibility.context.CloudContext;
 import com.microsoft.applicationinsights.extensibility.context.InternalContext;
 import com.microsoft.applicationinsights.internal.logger.InternalLogger;
 import com.microsoft.applicationinsights.internal.quickpulse.QuickPulseDataCollector;
-import com.microsoft.applicationinsights.internal.util.ChannelFetcher;
 import com.microsoft.applicationinsights.internal.shutdown.SDKShutdownActivity;
-import com.microsoft.applicationinsights.telemetry.*;
 import com.microsoft.applicationinsights.internal.util.MapUtil;
-import com.microsoft.applicationinsights.channel.TelemetryChannel;
-
-import com.google.common.base.Strings;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import com.microsoft.applicationinsights.telemetry.Duration;
+import com.microsoft.applicationinsights.telemetry.EventTelemetry;
+import com.microsoft.applicationinsights.telemetry.ExceptionTelemetry;
+import com.microsoft.applicationinsights.telemetry.MetricTelemetry;
+import com.microsoft.applicationinsights.telemetry.PageViewTelemetry;
+import com.microsoft.applicationinsights.telemetry.RemoteDependencyTelemetry;
+import com.microsoft.applicationinsights.telemetry.RequestTelemetry;
+import com.microsoft.applicationinsights.telemetry.SessionState;
+import com.microsoft.applicationinsights.telemetry.SeverityLevel;
+import com.microsoft.applicationinsights.telemetry.Telemetry;
+import com.microsoft.applicationinsights.telemetry.TelemetryContext;
+import com.microsoft.applicationinsights.telemetry.TraceTelemetry;
 
 // Created by gupele
 /**
@@ -104,7 +112,7 @@ public class TelemetryClient {
      * @return 'true' if tracking is disabled, 'false' otherwise.
      */
     public boolean isDisabled() {
-        return (Strings.isNullOrEmpty(configuration.getInstrumentationKey()) && Strings.isNullOrEmpty(getContext().getInstrumentationKey()))
+        return (StringUtils.isEmpty(configuration.getInstrumentationKey()) && StringUtils.isEmpty(getContext().getInstrumentationKey()))
                 || configuration.isTrackingDisabled();
     }
 
@@ -130,7 +138,7 @@ public class TelemetryClient {
             return;
         }
 
-        if (Strings.isNullOrEmpty(name)) {
+        if (StringUtils.isEmpty(name)) {
             name = "";
         }
 
@@ -169,7 +177,7 @@ public class TelemetryClient {
             return;
         }
 
-        if (Strings.isNullOrEmpty(message)) {
+        if (StringUtils.isEmpty(message)) {
             message = "";
         }
 
@@ -403,7 +411,7 @@ public class TelemetryClient {
 
         TelemetryContext ctx = this.getContext();
 
-        if (Strings.isNullOrEmpty(ctx.getInstrumentationKey())) {
+        if (StringUtils.isEmpty(ctx.getInstrumentationKey())) {
             ctx.setInstrumentationKey(configuration.getInstrumentationKey());
         }
 
@@ -422,7 +430,7 @@ public class TelemetryClient {
 
         activateInitializers(telemetry);
 
-        if (Strings.isNullOrEmpty(telemetry.getContext().getInstrumentationKey())) {
+        if (StringUtils.isEmpty(telemetry.getContext().getInstrumentationKey())) {
             throw new IllegalArgumentException("Instrumentation key cannot be undefined.");
         }
 

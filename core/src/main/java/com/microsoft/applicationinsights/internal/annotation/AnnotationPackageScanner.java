@@ -21,16 +21,18 @@
 
 package com.microsoft.applicationinsights.internal.annotation;
 
-import com.microsoft.applicationinsights.internal.logger.InternalLogger;
-import eu.infomas.annotation.AnnotationDetector;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.core.type.filter.AnnotationTypeFilter;
 
 /**
  * Created by gupele on 3/15/2015.
+ * updated 3/28/2020 to use Spring
  */
 public final class AnnotationPackageScanner {
     private AnnotationPackageScanner(){}
@@ -41,34 +43,16 @@ public final class AnnotationPackageScanner {
      * @return A list of class names that are under the package we asked and that carry the needed annotations
      */
     public static List<String> scanForClassAnnotations(final Class<? extends Annotation>[] annotationsToSearch, String packageToScan) {
-        final ArrayList<String> performanceModuleNames = new ArrayList<String>();
-        AnnotationDetector.TypeReporter reporter = new AnnotationDetector.TypeReporter() {
-            @Override
-            @SuppressWarnings("unchecked")
-            public Class<? extends Annotation>[] annotations() {
-                return annotationsToSearch;
-            }
-
-            @Override
-            public void reportTypeAnnotation(Class<? extends Annotation> annotation, String className) {
-                performanceModuleNames.add(className);
-            }
-        };
-        final AnnotationDetector annotationDetector = new AnnotationDetector(reporter);
-        try {
-            annotationDetector.detect(packageToScan);
-        } catch (ThreadDeath td) {
-            throw td;
-        } catch (Throwable t) {
-            try {
-                InternalLogger.INSTANCE.error("Failed to scan packages '%s': exception: '%s'", packageToScan, t.toString());                InternalLogger.INSTANCE.trace("Stack trace generated is %s", ExceptionUtils.getStackTrace(t));
-            } catch (ThreadDeath td) {
-                throw td;
-            } catch (Throwable t2) {
-                // chomp
-            }
-        }
-
-        return performanceModuleNames;
+    	final ArrayList<String> performanceModuleNames = new ArrayList<String>();
+    	
+    	ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false);
+    	for ( Class<? extends Annotation> annotationClass : annotationsToSearch ) {
+    		scanner.addIncludeFilter(new AnnotationTypeFilter(annotationClass));
+    	}
+    	Set<BeanDefinition> definitions = scanner.findCandidateComponents(packageToScan);
+    	for(BeanDefinition def : definitions) {
+    	    performanceModuleNames.add( def.getBeanClassName() );
+    	}
+    	return performanceModuleNames;
     }
 }

@@ -23,31 +23,34 @@ package com.microsoft.applicationinsights.internal.config;
 
 import java.util.ArrayList;
 
-import com.thoughtworks.xstream.annotations.XStreamAlias;
-import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
-import com.thoughtworks.xstream.annotations.XStreamImplicit;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlList;
 
 /**
  * Created by gupele on 3/15/2015.
  */
+@XmlAccessorType(XmlAccessType.FIELD)
 public class PerformanceCountersXmlElement {
 
-    @XStreamAlias("UseBuiltIn")
+	@XmlElement(name="UseBuiltIn")
     private boolean useBuiltIn = true;
 
-    @XStreamAsAttribute
+    @XmlAttribute
     private long collectionFrequencyInSec = 60;
 
-    @XStreamAlias("Jvm")
+    @XmlElement(name="Jvm")
     private PerformanceCounterJvmSectionXmlElement jvmSection;
 
-    @XStreamAlias("Plugin")
+    @XmlElement(name="Plugin")
     private String plugin;
 
-    @XStreamAlias("Jmx")
+    @XmlElement(name="Jmx")
     private JmxWrapperXmlElement jmxWrapper = new JmxWrapperXmlElement();
 
-    @XStreamAlias("Windows")
+    @XmlElement(name="Windows")
     private WindowsPCWrapperXmlElement windowsPCWrapper = new WindowsPCWrapperXmlElement();
 
     public ArrayList<JmxXmlElement> getJmxXmlElements() {
@@ -100,13 +103,13 @@ public class PerformanceCountersXmlElement {
 
     public static class JmxWrapperXmlElement {
 
-        @XStreamImplicit(itemFieldName = "Add")
+    	@XmlElement(name="Add")
         private ArrayList<JmxXmlElement> jmxXmlElements;
     }
 
     public static class WindowsPCWrapperXmlElement {
 
-        @XStreamImplicit(itemFieldName = "Add")
+    	@XmlElement(name="Add")
         private ArrayList<WindowsPerformanceCounterXmlElement> windowsPCs;
     }
 }

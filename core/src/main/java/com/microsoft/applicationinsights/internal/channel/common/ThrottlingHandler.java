@@ -7,9 +7,7 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.http.Header;
 
-import com.google.common.base.Strings;
 import com.microsoft.applicationinsights.internal.channel.TransmissionHandler;
 import com.microsoft.applicationinsights.internal.channel.TransmissionHandlerArgs;
 import com.microsoft.applicationinsights.internal.logger.InternalLogger;
@@ -83,19 +81,15 @@ public class ThrottlingHandler implements TransmissionHandler {
      * @param retryAfterHeader
      *            The header that is captured from the HTTP response.
      */
-    private void suspendTransmissions(TransmissionPolicy suspensionPolicy, Header retryAfterHeader) {
+    private void suspendTransmissions(TransmissionPolicy suspensionPolicy, String retryAfterHeader) {
 
         if (retryAfterHeader == null) {
-            return;
-        }
-        String retryAfterAsString = retryAfterHeader.getValue();
-        if (Strings.isNullOrEmpty(retryAfterAsString)) {
             return;
         }
 
         try {
             DateFormat formatter = new SimpleDateFormat(RESPONSE_RETRY_AFTER_DATE_FORMAT);
-            Date date = formatter.parse(retryAfterAsString);
+            Date date = formatter.parse(retryAfterHeader);
 
             Date now = Calendar.getInstance().getTime();
             long retryAfterAsSeconds = (date.getTime() - convertToDateToGmt(now).getTime()) / 1000;

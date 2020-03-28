@@ -21,8 +21,11 @@
 
 package com.microsoft.applicationinsights.telemetry;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.microsoft.applicationinsights.internal.schemav2.SeverityLevel;
 
 import org.junit.Test;
@@ -90,7 +93,7 @@ public class JsonTelemetryDataSerializerTest {
         private String s2;
         private Map<String, Integer> m1 = new HashMap<String, Integer>();
         private List<String> list1 = new ArrayList<String>();
-        private com.microsoft.applicationinsights.internal.schemav2.SeverityLevel severity;
+        private SeverityLevel severity;
         private boolean b1;
         private short sh1;
         private float f1;
@@ -162,6 +165,9 @@ public class JsonTelemetryDataSerializerTest {
             this.list1 = list1;
         }
 
+        public SeverityLevel getSeverity() {
+			return severity;
+		}
         public void setSeverity(com.microsoft.applicationinsights.internal.schemav2.SeverityLevel severity) {
             this.severity = severity;
         }
@@ -239,8 +245,14 @@ public class JsonTelemetryDataSerializerTest {
         testClassWithStrings.serialize(tested);
         tested.close();
         String str = stringWriter.toString();
-        TestClassWithStrings bac = new Gson().fromJson(str, TestClassWithStrings.class);
+        TestClassWithStrings bac = fromJson(str, TestClassWithStrings.class);
         assertEquals(bac, testClassWithStrings);
+    }
+    
+    private ObjectMapper mapper = new ObjectMapper()
+    		.setSerializationInclusion(Include.NON_NULL);
+    private <T> T fromJson(String str, Class<T> klass) throws IOException {
+    	return mapper.readValue(str, klass);
     }
 
     //This is to test if the write method with name parameters work
@@ -255,8 +267,8 @@ public class JsonTelemetryDataSerializerTest {
             testClassWithStrings.serialize(tested);
             tested.close();
             String str = stringWriter.toString();
-            TestClassWithStrings bac = new Gson().fromJson(str, TestClassWithStrings.class);
-            Map<String, String> recoveryMap = new Gson().fromJson(str, new TypeToken<HashMap<String, String>>() {}.getType());
+            TestClassWithStrings bac = fromJson(str, TestClassWithStrings.class);
+            Map<String, String> recoveryMap = fromJson(str, Map.class);
             assertNotEquals((recoveryMap.get("s1")).length(), s1.length());
             assertNotEquals(bac, testClassWithStrings);
     }
@@ -274,7 +286,7 @@ public class JsonTelemetryDataSerializerTest {
         testClassWithStrings.serialize(tested);
         tested.close();
         String str = stringWriter.toString();
-        Map<String, String> recoveryMap = new Gson().fromJson(str, new TypeToken<HashMap<String, String>>() {}.getType());
+        Map<String, String> recoveryMap = fromJson(str, Map.class);
         assertEquals("\\'\\f\\b\\f\\n\\r\\t/\\", recoveryMap.get("s1"));
         assertEquals("0x0021\t", recoveryMap.get("s2"));
     }
@@ -288,7 +300,7 @@ public class JsonTelemetryDataSerializerTest {
         testClassWithStrings.serialize(tested);
         tested.close();
         String str = stringWriter.toString();
-        Map<String, String> recoveryMap = new Gson().fromJson(str, new TypeToken<HashMap<String, String>>() {}.getType());
+        Map<String, String> recoveryMap = fromJson(str, Map.class);
         assertEquals("DEFAULT s1", recoveryMap.get("s1"));
         assertEquals(null, recoveryMap.get("s2"));
     }
@@ -302,7 +314,7 @@ public class JsonTelemetryDataSerializerTest {
         testClassWithStrings.serialize(tested);
         tested.close();
         String str = stringWriter.toString();
-        Map<String, String> recoveryMap = new Gson().fromJson(str, new TypeToken<HashMap<String, String>>() {}.getType());
+        Map<String, String> recoveryMap = fromJson(str, Map.class);
         assertEquals("DEFAULT s1", recoveryMap.get("s1"));
         assertNull(recoveryMap.get("s2"));
     }
@@ -335,8 +347,7 @@ public class JsonTelemetryDataSerializerTest {
 
         System.out.println("[test] Serialized StubClass: " + str);
 
-        Gson gson = new Gson();
-        StubClass bac = gson.fromJson(str, StubClass.class);
+        StubClass bac = fromJson(str, StubClass.class);
         assertEquals(bac.i1, stubClass.i1);
         assertEquals(bac.i2, stubClass.i2);
         assertEquals(bac.l1, stubClass.l1);
@@ -353,7 +364,7 @@ public class JsonTelemetryDataSerializerTest {
 
         // There's a bug in Gson where it does not respect setLeinient(false) to enable strict parsing/deserialization. There doesn't appear to be a workaround.
         // this should verify that the Json is valid.
-        assertEquals(str, gson.toJson(bac));
+        assertEquals(str, mapper.writeValueAsString(bac));
     }
 
     @Test
@@ -372,8 +383,7 @@ public class JsonTelemetryDataSerializerTest {
 
         System.out.println("[testFloatingPointNaNs] Serialized StubClass: " + str);
 
-        Gson gson = new Gson();
-        StubClass bac = gson.fromJson(str, StubClass.class);
+        StubClass bac = fromJson(str, StubClass.class);
         final double epsilon = Math.ulp(0.0);
         assertEquals(0, bac.f1, epsilon);
         assertEquals(0, bac.f2, epsilon);
@@ -397,8 +407,7 @@ public class JsonTelemetryDataSerializerTest {
 
         System.out.println("[testFloatingPointInfinity] Serialized StubClass: " + str);
 
-        Gson gson = new Gson();
-        StubClass bac = gson.fromJson(str, StubClass.class);
+        StubClass bac = fromJson(str, StubClass.class);
         final double epsilon = Math.ulp(0.0);
         assertEquals(0, bac.f1, epsilon);
         assertEquals(0, bac.f2, epsilon);

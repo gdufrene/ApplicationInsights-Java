@@ -21,7 +21,8 @@
 
 package com.microsoft.applicationinsights.telemetry;
 
-import com.google.common.base.Strings;
+import org.apache.commons.lang3.StringUtils;
+
 import com.microsoft.applicationinsights.internal.schemav2.DataPoint;
 import com.microsoft.applicationinsights.internal.schemav2.DataPointType;
 import com.microsoft.applicationinsights.internal.schemav2.MetricData;
@@ -101,7 +102,7 @@ public final class MetricTelemetry extends BaseTelemetry<MetricData> {
      * @throws IllegalArgumentException if the name is null or empty.
      */
     public void setName(String name) {
-        if (Strings.isNullOrEmpty(name)) {
+        if (StringUtils.isEmpty(name)) {
             throw new IllegalArgumentException("The metric name cannot be null or empty");
         }
 

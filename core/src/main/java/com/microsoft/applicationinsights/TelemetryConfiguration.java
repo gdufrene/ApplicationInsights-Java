@@ -21,8 +21,6 @@
 
 package com.microsoft.applicationinsights;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Strings;
 import com.microsoft.applicationinsights.channel.TelemetryChannel;
 import com.microsoft.applicationinsights.channel.concrete.nop.NopTelemetryChannel;
 import com.microsoft.applicationinsights.extensibility.ContextInitializer;
@@ -36,6 +34,8 @@ import com.microsoft.applicationinsights.internal.config.connection.InvalidConne
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Encapsulates the global telemetry configuration typically loaded from the ApplicationInsights.xml file.
@@ -211,7 +211,7 @@ public final class TelemetryConfiguration {
     public void setInstrumentationKey(String key) {
 
         // A non null, non empty instrumentation key is a must
-        if (Strings.isNullOrEmpty(key)) {
+        if (StringUtils.isEmpty(key)) {
             throw new IllegalArgumentException("key");
         }
 
@@ -246,7 +246,7 @@ public final class TelemetryConfiguration {
     /**
      * Method for tear down in tests
      */
-    @VisibleForTesting
+    // @VisibleForTesting
     static void setActiveAsNull() {
         active = null;
     }

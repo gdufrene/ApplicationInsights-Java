@@ -21,7 +21,6 @@
 
 package com.microsoft.applicationinsights.telemetry;
 
-import com.google.common.base.Strings;
 import com.microsoft.applicationinsights.internal.schemav2.DataPointType;
 import com.microsoft.applicationinsights.internal.util.LocalStringsUtils;
 
@@ -35,6 +34,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * This class knows how to transform data that is relevant to {@link Telemetry} instances into JSON.
@@ -231,7 +232,7 @@ public final class JsonTelemetryDataSerializer {
         }
 
         String jsonStringToAppend = createJsonFor(value);
-        if (Strings.isNullOrEmpty(jsonStringToAppend)) {
+        if (StringUtils.isEmpty(jsonStringToAppend)) {
             return;
         }
 
@@ -293,7 +294,7 @@ public final class JsonTelemetryDataSerializer {
     private <T> void write(T item) throws IOException {
         if (item instanceof JsonSerializable) {
             String jsonStringToAppend = createJsonFor((JsonSerializable)item);
-            if (Strings.isNullOrEmpty(jsonStringToAppend)) {
+            if (StringUtils.isEmpty(jsonStringToAppend)) {
                 return;
             }
 
@@ -319,7 +320,7 @@ public final class JsonTelemetryDataSerializer {
         value.serialize(temp);
         temp.close();
         String jsonStringToAppend = stringWriter.toString();
-        if (Strings.isNullOrEmpty(jsonStringToAppend) || JSON_EMPTY_OBJECT.equals(jsonStringToAppend)) {
+        if (StringUtils.isEmpty(jsonStringToAppend) || JSON_EMPTY_OBJECT.equals(jsonStringToAppend)) {
             return "";
         }
 
@@ -413,7 +414,7 @@ public final class JsonTelemetryDataSerializer {
     }
 
     private String MakeKeyNonEmpty(String key) {
-        return Strings.isNullOrEmpty(key) ? "(required property name is empty)" : key;
+        return StringUtils.isEmpty(key) ? "(required property name is empty)" : key;
     }
 
     private String truncate(String value, int len) {

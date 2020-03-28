@@ -26,6 +26,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Date;
+import java.util.Locale;
 
 import static org.junit.Assert.*;
 
@@ -120,7 +121,7 @@ public final class PerformanceCounterTelemetryTest {
         jsonWriter.close();
         String asJson = writer.toString();
         String expectedPerformanceDataPartFormat = "\"baseData\":{\"ver\":2,\"categoryName\":\"%s\",\"counterName\":\"%s\",\"instanceName\":\"%s\",\"value\":%.1f}}}";
-        String expected = String.format(expectedPerformanceDataPartFormat, expectedCategory, expectedCounter, expectedInstance, expectedValue);
+        String expected = String.format(Locale.US ,expectedPerformanceDataPartFormat, expectedCategory, expectedCounter, expectedInstance, expectedValue);
         assertTrue(asJson.indexOf(expected) != -1);
     }
 }

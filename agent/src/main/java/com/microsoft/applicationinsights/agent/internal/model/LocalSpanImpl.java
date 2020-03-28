@@ -21,7 +21,6 @@
 
 package com.microsoft.applicationinsights.agent.internal.model;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.microsoft.applicationinsights.agent.internal.sdk.SdkBridge;
 import com.microsoft.applicationinsights.agent.internal.sdk.SdkBridge.ExceptionTelemetry;
 import com.microsoft.applicationinsights.agent.internal.sdk.SdkBridge.RemoteDependencyTelemetry;
@@ -105,7 +104,7 @@ public class LocalSpanImpl implements Span {
         }
     }
 
-    @VisibleForTesting
+    //@VisibleForTesting
     static @Nullable RemoteDependencyTelemetry createRemoteDependencyTelemetry(String text, long startTimeMillis,
                                                                                @Nullable Throwable exception) {
         int startIndex = PREFIX.length();

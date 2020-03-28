@@ -21,11 +21,12 @@
 
 package com.microsoft.applicationinsights.telemetry;
 
-import com.google.common.base.Strings;
 import com.microsoft.applicationinsights.internal.schemav2.EventData;
 import com.microsoft.applicationinsights.internal.util.Sanitizer;
 
 import java.util.concurrent.ConcurrentMap;
+
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Telemetry type used to track custom events in Azure Application Insights.
@@ -94,7 +95,7 @@ public final class EventTelemetry extends BaseSampleSourceTelemetry<EventData> {
      * @param name Name of the event. Max length 150.
      */
     public void setName(String name) {
-        if (Strings.isNullOrEmpty(name)) {
+        if (StringUtils.isEmpty(name)) {
             throw new IllegalArgumentException("The event name cannot be null or empty");
         }
 

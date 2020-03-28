@@ -1,9 +1,10 @@
 package com.microsoft.applicationinsights.internal.util;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
-import com.microsoft.applicationinsights.internal.logger.InternalLogger;
+
 import org.apache.commons.lang3.exception.ExceptionUtils;
+
+import com.microsoft.applicationinsights.common.Preconditions;
+import com.microsoft.applicationinsights.internal.logger.InternalLogger;
 
 /**
  * Created by gupele on 5/10/2015.

@@ -1,6 +1,5 @@
 package com.microsoft.applicationinsights.internal.channel.common;
 
-import org.apache.http.message.BasicHeader;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -35,7 +34,7 @@ public class ThrottlingHandlerTest {
         args.setResponseCode(code);
         args.setTransmission(new Transmission(new byte[] { 0 }, "testcontent", "testencoding"));
         args.setTransmissionDispatcher(mockedDispatcher);
-        args.setRetryHeader(new BasicHeader(RESPONSE_THROTTLING_HEADER, retryHeader));
+        args.setRetryHeader(retryHeader);
         ThrottlingHandler eh = new ThrottlingHandler(tpm);
         boolean result = eh.validateTransmissionAndSend(args);
         return result;

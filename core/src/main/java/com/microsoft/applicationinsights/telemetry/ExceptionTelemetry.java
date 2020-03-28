@@ -21,7 +21,6 @@
 
 package com.microsoft.applicationinsights.telemetry;
 
-import com.google.common.base.Strings;
 import com.microsoft.applicationinsights.internal.schemav2.ExceptionData;
 import com.microsoft.applicationinsights.internal.schemav2.ExceptionDetails;
 import com.microsoft.applicationinsights.internal.schemav2.StackFrame;
@@ -30,6 +29,8 @@ import com.microsoft.applicationinsights.internal.util.Sanitizer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
+
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Telemetry type used to track exceptions sent to Azure Application Insights.
@@ -193,7 +194,7 @@ public final class ExceptionTelemetry extends BaseSampleSourceTelemetry<Exceptio
         exceptionDetails.setTypeName(exception.getClass().getName());
 
         String exceptionMessage = exception.getMessage();
-        if (Strings.isNullOrEmpty(exceptionMessage)) {
+        if (StringUtils.isEmpty(exceptionMessage)) {
             exceptionMessage = exception.getClass().getName();
         }
         exceptionDetails.setMessage(exceptionMessage);
@@ -223,7 +224,7 @@ public final class ExceptionTelemetry extends BaseSampleSourceTelemetry<Exceptio
                 frame.setFileName(elem.getFileName());
                 frame.setLine(elem.getLineNumber());
 
-                if (!Strings.isNullOrEmpty(className)) {
+                if (!StringUtils.isEmpty(className)) {
                     frame.setMethod(elem.getClassName() + "." + elem.getMethodName());
                 }
                 else {

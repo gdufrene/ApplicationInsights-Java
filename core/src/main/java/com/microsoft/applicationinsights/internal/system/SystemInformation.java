@@ -23,10 +23,11 @@ package com.microsoft.applicationinsights.internal.system;
 
 import java.lang.management.ManagementFactory;
 
-import com.microsoft.applicationinsights.internal.logger.InternalLogger;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 
-import com.google.common.base.Strings;
+import com.microsoft.applicationinsights.internal.logger.InternalLogger;
+
 
 /**
  * Created by gupele on 3/3/2015.
@@ -52,7 +53,7 @@ public enum SystemInformation {
 
     private String initializeProcessId() {
         String rawName = ManagementFactory.getRuntimeMXBean().getName();
-        if (!Strings.isNullOrEmpty(rawName)) {
+        if (!StringUtils.isEmpty(rawName)) {
             int i = rawName.indexOf("@");
             if (i != -1) {
                 String processIdAsString = rawName.substring(0, i);

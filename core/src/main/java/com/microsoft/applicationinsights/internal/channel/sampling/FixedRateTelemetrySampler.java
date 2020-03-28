@@ -21,18 +21,25 @@
 
 package com.microsoft.applicationinsights.internal.channel.sampling;
 
-import java.util.Set;
-import java.util.Collections;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
-import com.google.common.util.concurrent.AtomicDouble;
 import com.microsoft.applicationinsights.channel.TelemetrySampler;
 import com.microsoft.applicationinsights.internal.logger.InternalLogger;
 import com.microsoft.applicationinsights.internal.util.LocalStringsUtils;
-import com.microsoft.applicationinsights.telemetry.*;
+import com.microsoft.applicationinsights.telemetry.EventTelemetry;
+import com.microsoft.applicationinsights.telemetry.ExceptionTelemetry;
+import com.microsoft.applicationinsights.telemetry.PageViewTelemetry;
+import com.microsoft.applicationinsights.telemetry.RemoteDependencyTelemetry;
+import com.microsoft.applicationinsights.telemetry.RequestTelemetry;
+import com.microsoft.applicationinsights.telemetry.SupportSampling;
+import com.microsoft.applicationinsights.telemetry.Telemetry;
+import com.microsoft.applicationinsights.telemetry.TraceTelemetry;
 
 /**
  * Created by gupele on 11/2/2016.
@@ -40,7 +47,7 @@ import com.microsoft.applicationinsights.telemetry.*;
  * Represents a telemetry sampler for sampling telemetry at a fixed-rate before sending to Application Insights.
  */
 public final class FixedRateTelemetrySampler implements TelemetrySampler {
-    private AtomicDouble samplingPercentage = new AtomicDouble(100.0);
+    private AtomicReference<Double> samplingPercentage = new AtomicReference<Double>(100.0);
     private HashSet<Class> excludeTypes = new HashSet<Class>();
     private HashSet<Class> includeTypes = new HashSet<Class>();
     private final HashMap<String, Class> allowedTypes = new HashMap<String, Class>();

@@ -21,23 +21,26 @@
 
 package com.microsoft.applicationinsights.internal.config;
 
-import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 
 /**
  * Created by gupele on 3/15/2015.
  */
+@XmlAccessorType(XmlAccessType.FIELD)
 public class JmxXmlElement {
 
-    @XStreamAsAttribute
+    @XmlAttribute
     private String displayName;
 
-    @XStreamAsAttribute
+    @XmlAttribute
     private String objectName;
 
-    @XStreamAsAttribute
+    @XmlAttribute
     private String attribute;
 
-    @XStreamAsAttribute
+    @XmlAttribute
     private String type;
 
     public String getDisplayName() {

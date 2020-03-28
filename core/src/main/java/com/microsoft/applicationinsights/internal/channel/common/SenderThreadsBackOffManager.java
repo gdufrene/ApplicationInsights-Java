@@ -26,8 +26,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.microsoft.applicationinsights.internal.logger.InternalLogger;
 
-import com.google.common.primitives.Longs;
-
 /**
  * The class is responsible for managing the back-offs of Sender Threads.
  *
@@ -130,6 +128,6 @@ final class SenderThreadsBackOffManager extends ThreadLocal<SenderThreadLocalBac
             return;
         }
 
-        backOffTimeoutsInMilliseconds = Longs.toArray(validBackOffTimeoutsInSeconds);
+        backOffTimeoutsInMilliseconds = validBackOffTimeoutsInSeconds.stream().mapToLong( Long::longValue ).toArray();
     }
 }

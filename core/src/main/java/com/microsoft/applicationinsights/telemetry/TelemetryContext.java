@@ -21,7 +21,6 @@
 
 package com.microsoft.applicationinsights.telemetry;
 
-import com.google.common.base.Strings;
 import com.microsoft.applicationinsights.extensibility.context.CloudContext;
 import com.microsoft.applicationinsights.extensibility.context.ComponentContext;
 import com.microsoft.applicationinsights.extensibility.context.DeviceContext;
@@ -34,6 +33,8 @@ import com.microsoft.applicationinsights.internal.util.MapUtil;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Represents a context for sending telemetry to the Application Insights service.
@@ -197,7 +198,7 @@ public final class TelemetryContext {
     }
 
     public void initialize(TelemetryContext source) {
-        if (Strings.isNullOrEmpty(this.instrumentationKey) && !Strings.isNullOrEmpty(source.getInstrumentationKey()))
+        if (StringUtils.isEmpty(this.instrumentationKey) && !StringUtils.isEmpty(source.getInstrumentationKey()))
             setInstrumentationKey(source.getInstrumentationKey());
 
         MapUtil.copy(source.tags, this.tags);

@@ -26,9 +26,8 @@ import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.microsoft.applicationinsights.internal.logger.InternalLogger;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
+import org.apache.commons.lang3.StringUtils;
+
 
 /**
  * Methods that would have been great to have on maps.
@@ -54,7 +53,7 @@ public class MapUtil
 
         for (Map.Entry<String,Value> entry : source.entrySet()) {
             String key = entry.getKey();
-            if (Strings.isNullOrEmpty(key)) {
+            if (StringUtils.isEmpty(key)) {
                 continue;
             }
 
@@ -85,7 +84,7 @@ public class MapUtil
     }
 
     public static void setStringValueOrRemove(Map<String, String> map, String key, String value) {
-        if (Strings.isNullOrEmpty(value)) {
+        if (StringUtils.isEmpty(value)) {
             map.remove(key);
         } else {
             map.put(key, value);

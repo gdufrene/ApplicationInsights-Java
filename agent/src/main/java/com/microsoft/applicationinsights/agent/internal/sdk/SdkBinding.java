@@ -21,9 +21,9 @@
 
 package com.microsoft.applicationinsights.agent.internal.sdk;
 
+import java.util.HashSet;
 import java.util.Set;
 
-import com.google.common.collect.Sets;
 import com.microsoft.applicationinsights.agent.internal.model.Global;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.glowroot.instrumentation.engine.bytecode.api.ThreadContextThreadLocal;
@@ -35,7 +35,7 @@ public class SdkBinding<T> implements BindingResult {
     private final @Nullable T requestTelemetryContext;
 
     // aux thread contexts started by this sdk binding (request)
-    private final Set<ThreadContextThreadLocal.Holder> auxThreadContextHolders = Sets.newHashSet();
+    private final Set<ThreadContextThreadLocal.Holder> auxThreadContextHolders = new HashSet<>();
 
     SdkBinding(SdkBridge<T> sdkBridge, @Nullable T requestTelemetryContext) {
         this.sdkBridge = sdkBridge;

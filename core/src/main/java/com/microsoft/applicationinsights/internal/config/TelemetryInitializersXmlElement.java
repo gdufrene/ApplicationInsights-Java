@@ -22,20 +22,21 @@
 package com.microsoft.applicationinsights.internal.config;
 
 import java.util.ArrayList;
-import java.util.List;
 
-import com.thoughtworks.xstream.annotations.XStreamAlias;
-import com.thoughtworks.xstream.annotations.XStreamImplicit;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 
 /**
  * Created by gupele on 3/15/2015.
  */
+@XmlAccessorType(XmlAccessType.FIELD)
 public class TelemetryInitializersXmlElement {
 
-    @XStreamImplicit(itemFieldName = "Add")
+	@XmlElement(name= "Add")
     private ArrayList<AddTypeXmlElement> adds;
 
-    @XStreamImplicit(itemFieldName = "Remove")
+	@XmlElement(name= "Remove")
     private ArrayList<AddTypeXmlElement> removes;
 
     public ArrayList<AddTypeXmlElement> getAdds() {
