@@ -11,6 +11,8 @@
     	<module>agent</module>
 	    <module>ApplicationInsightsInternalLogger</module>
 	    <module>core</module>
+	    <module>collectd</module>
+	    <module>web</module>
 	</modules> 
         
 	<properties>
@@ -40,6 +42,11 @@
 			<dependency>
 			    <groupId>org.springframework</groupId>
 			    <artifactId>spring-web</artifactId>
+			    <version>5.1.14.RELEASE</version>
+			</dependency>
+			<dependency>
+			    <groupId>org.springframework</groupId>
+			    <artifactId>spring-webmvc</artifactId>
 			    <version>5.1.14.RELEASE</version>
 			</dependency>
 			<dependency>

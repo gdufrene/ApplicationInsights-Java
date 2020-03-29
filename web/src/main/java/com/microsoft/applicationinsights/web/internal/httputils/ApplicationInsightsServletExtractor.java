@@ -1,7 +1,6 @@
 package com.microsoft.applicationinsights.web.internal.httputils;
 
 import org.apache.commons.lang3.Validate;
-import org.apache.http.annotation.Experimental;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -9,7 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Adopter to extract information from {@link HttpServletRequest} and {@link HttpServletResponse}
  */
-@Experimental
+// @Experimental
 public class ApplicationInsightsServletExtractor implements HttpExtractor<HttpServletRequest, HttpServletResponse> {
 
     private static final String USER_AGENT_HEADER = "User-Agent";

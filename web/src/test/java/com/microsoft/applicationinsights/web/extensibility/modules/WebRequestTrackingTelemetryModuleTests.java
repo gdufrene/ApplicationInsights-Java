@@ -21,6 +21,36 @@
 
 package com.microsoft.applicationinsights.web.extensibility.modules;
 
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+
 import com.microsoft.applicationinsights.TelemetryClient;
 import com.microsoft.applicationinsights.TelemetryConfiguration;
 import com.microsoft.applicationinsights.extensibility.TelemetryModule;
@@ -32,11 +62,11 @@ import com.microsoft.applicationinsights.web.internal.RequestTelemetryContext;
 import com.microsoft.applicationinsights.web.internal.ThreadContext;
 import com.microsoft.applicationinsights.web.internal.correlation.ApplicationIdResolver;
 import com.microsoft.applicationinsights.web.internal.correlation.InstrumentationKeyResolver;
+import com.microsoft.applicationinsights.web.internal.correlation.InstrumentationKeyResolverTestHelper;
 import com.microsoft.applicationinsights.web.internal.correlation.ProfileFetcherResult;
 import com.microsoft.applicationinsights.web.internal.correlation.ProfileFetcherResultTaskStatus;
 import com.microsoft.applicationinsights.web.internal.correlation.TelemetryCorrelationUtils;
 import com.microsoft.applicationinsights.web.internal.correlation.TelemetryCorrelationUtilsTests;
-import com.microsoft.applicationinsights.web.internal.correlation.InstrumentationKeyResolverTestHelper;
 import com.microsoft.applicationinsights.web.internal.correlation.TraceContextCorrelation;
 import com.microsoft.applicationinsights.web.internal.correlation.TraceContextCorrelationTests;
 import com.microsoft.applicationinsights.web.internal.correlation.tracecontext.Traceparent;
@@ -44,32 +74,13 @@ import com.microsoft.applicationinsights.web.utils.HttpHelper;
 import com.microsoft.applicationinsights.web.utils.JettyTestServer;
 import com.microsoft.applicationinsights.web.utils.MockTelemetryChannel;
 import com.microsoft.applicationinsights.web.utils.ServletUtils;
-import org.apache.http.HttpStatus;
-import org.eclipse.jetty.http.HttpMethod;
-import org.junit.*;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.*;
 
 /**
  * Created by yonisha on 2/2/2015.
  */
 public class WebRequestTrackingTelemetryModuleTests {
     private static final String DEFAULT_REQUEST_URI = "/controller/action.action";
-    private static final String DEFAULT_REQUEST_NAME = HttpMethod.GET.asString() + " " + DEFAULT_REQUEST_URI;
+    private static final String DEFAULT_REQUEST_NAME = "GET " + DEFAULT_REQUEST_URI;
 
     private static JettyTestServer server = new JettyTestServer();
     private static WebRequestTrackingTelemetryModule defaultModule;
@@ -130,9 +141,9 @@ public class WebRequestTrackingTelemetryModuleTests {
         assertThat(items, hasSize(1));
         RequestTelemetry requestTelemetry = items.get(0);
 
-        assertEquals(String.valueOf(HttpStatus.SC_OK), requestTelemetry.getResponseCode());
-        assertEquals(HttpMethod.GET.asString() + " /", requestTelemetry.getName());
-        assertEquals(HttpMethod.GET.asString(), requestTelemetry.getHttpMethod());
+        assertEquals("200", requestTelemetry.getResponseCode());
+        assertEquals("GET /", requestTelemetry.getName());
+        assertEquals("GET", requestTelemetry.getHttpMethod());
         assertEquals("http://localhost:" + server.getPortNumber() + "/", requestTelemetry.getUrl().toString());
     }
 
@@ -1021,7 +1032,7 @@ public class WebRequestTrackingTelemetryModuleTests {
         }
 
         when(request.getRequestURI()).thenReturn(uri);
-        when(request.getMethod()).thenReturn(HttpMethod.GET.asString());
+        when(request.getMethod()).thenReturn("GET");
         when(request.getScheme()).thenReturn("http");
         when(request.getHeader("Host")).thenReturn("localhost:" + server.getPortNumber());
         when(request.getQueryString()).thenReturn(queryString);

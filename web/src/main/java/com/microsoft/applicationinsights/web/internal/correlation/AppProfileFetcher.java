@@ -25,8 +25,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
-import org.apache.http.ParseException;
-
 /**
  * Retrieves the application profile from storage
  * @deprecated Replaced by {@link ApplicationIdResolver}
@@ -42,5 +40,5 @@ public interface AppProfileFetcher extends Closeable {
      * @throws IOException
      * @throws ParseException
      */
-    ProfileFetcherResult fetchAppProfile(String instrumentationKey) throws InterruptedException, ExecutionException, ParseException, IOException;
+    ProfileFetcherResult fetchAppProfile(String instrumentationKey) throws InterruptedException, ExecutionException, IOException;
 }

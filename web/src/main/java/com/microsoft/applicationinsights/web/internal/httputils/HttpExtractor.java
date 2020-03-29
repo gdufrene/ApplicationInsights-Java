@@ -1,13 +1,12 @@
 package com.microsoft.applicationinsights.web.internal.httputils;
 
-import org.apache.http.annotation.Experimental;
 
 /**
  * Adapter Interface for handling information extraction from Http client and server.
  * @param <P> HttpRequest Entity
  * @param <Q> HttpResponse Entity
  */
-@Experimental
+// @Experimental
 public interface HttpExtractor<P /* >>> extends @NonNull Object*/, Q> {
 
     /**

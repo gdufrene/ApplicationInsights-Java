@@ -21,44 +21,50 @@
 
 package com.microsoft.applicationinsights.web.internal.correlation;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+
 import com.microsoft.applicationinsights.TelemetryConfiguration;
 import com.microsoft.applicationinsights.internal.logger.InternalLogger;
 import com.microsoft.applicationinsights.internal.shutdown.SDKShutdownActivity;
 import com.microsoft.applicationinsights.internal.util.PeriodicTaskPool;
-import com.microsoft.applicationinsights.internal.util.SSLOptionsUtil;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
-import org.apache.http.impl.nio.client.HttpAsyncClients;
-import org.apache.http.nio.conn.ssl.SSLIOSessionStrategy;
-import org.apache.http.ssl.SSLContexts;
-import org.apache.http.util.EntityUtils;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+import reactor.core.publisher.Mono;
 
 public class CdsProfileFetcher implements AppProfileFetcher, ApplicationIdResolver {
 
-    private CloseableHttpAsyncClient httpClient;
     private String endpointAddress = null;
     private static final String PROFILE_QUERY_ENDPOINT_APP_ID_FORMAT = "%s/api/profiles/%s/appId";
 
     // cache of tasks per ikey
-    /* Visible for Testing */ final ConcurrentMap<String, Future<HttpResponse>> tasks;
+    /* Visible for Testing */ final ConcurrentMap<String, Future<String>> tasks;
 
     // failure counters per ikey
     /* Visible for Testing */ final ConcurrentMap<String, Integer> failureCounters;
 
     private final PeriodicTaskPool taskThreadPool;
+    private final ExecutorService executorService = Executors.newCachedThreadPool();
     private final CdsRetryPolicy retryPolicy;
+    
+    // for testing purpose
+    private Function<String, Future<String>> futureTaskFactory = this::createFetchTask;
+    void setFutureTaskFactory(Function<String, Future<String>> futureTaskFactory) {
+		this.futureTaskFactory = futureTaskFactory;
+	}
 
     public CdsProfileFetcher() {
         this(new CdsRetryPolicy());
@@ -68,6 +74,7 @@ public class CdsProfileFetcher implements AppProfileFetcher, ApplicationIdResolv
         taskThreadPool = new PeriodicTaskPool(1, CdsProfileFetcher.class.getSimpleName());
         this.retryPolicy = retryPolicy;
 
+        /*
         RequestConfig requestConfig = RequestConfig.custom()
                 .setSocketTimeout(5000)
                 .setConnectTimeout(5000)
@@ -80,6 +87,7 @@ public class CdsProfileFetcher implements AppProfileFetcher, ApplicationIdResolv
                 .setSSLStrategy(new SSLIOSessionStrategy(SSLContexts.createDefault(), allowedProtocols, null, SSLIOSessionStrategy.getDefaultHostnameVerifier()))
                 .useSystemProperties()
                 .build());
+                */
 
         long resetInterval = retryPolicy.getResetPeriodInMinutes();
         PeriodicTaskPool.PeriodicRunnableTask cdsRetryClearTask = PeriodicTaskPool.PeriodicRunnableTask.createTask(new CachePurgingRunnable(),
@@ -89,7 +97,7 @@ public class CdsProfileFetcher implements AppProfileFetcher, ApplicationIdResolv
         this.failureCounters = new ConcurrentHashMap<>();
 
         taskThreadPool.executePeriodicRunnableTask(cdsRetryClearTask);
-        this.httpClient.start();
+        // this.httpClient.start();
 
         SDKShutdownActivity.INSTANCE.register(this);
     }
@@ -127,13 +135,16 @@ public class CdsProfileFetcher implements AppProfileFetcher, ApplicationIdResolv
             InternalLogger.INSTANCE.info("The profile fetch task will not execute for next %d minutes. Max number of retries reached.", retryPolicy.getResetPeriodInMinutes());
             return result;
         }
+        
 
-        Future<HttpResponse> currentTask = this.tasks.get(instrumentationKey);
+
+        Future<String> currentTask = this.tasks.get(instrumentationKey);
 
         // if no task currently exists for this ikey, then let's create one.
         if (currentTask == null) {
-            currentTask = createFetchTask(instrumentationKey, configuration);
-            Future<HttpResponse> mapValue = this.tasks.putIfAbsent(instrumentationKey, currentTask);
+        	String endpoint = getEndpointUrl(instrumentationKey, configuration);
+            currentTask = futureTaskFactory.apply(endpoint);
+            Future<String> mapValue = this.tasks.putIfAbsent(instrumentationKey, currentTask);
             // it's possible for another thread to create a fetch task
             if (mapValue != null) { // if there is already a mapping, then let's discard the new one and check if the existing task has completed.
                 currentTask = mapValue;
@@ -147,14 +158,7 @@ public class CdsProfileFetcher implements AppProfileFetcher, ApplicationIdResolv
 
         // task is ready, we can call get() now.
         try {
-            HttpResponse response = currentTask.get();
-
-            if (response.getStatusLine().getStatusCode() != 200) {
-                incrementFailureCount(instrumentationKey);
-                return new ProfileFetcherResult(null, ProfileFetcherResultTaskStatus.FAILED);
-            }
-
-            String appId = EntityUtils.toString(response.getEntity());
+            String appId = currentTask.get();
 
             //check for case when breeze returns invalid value
             if (appId == null || appId.isEmpty()) {
@@ -163,19 +167,19 @@ public class CdsProfileFetcher implements AppProfileFetcher, ApplicationIdResolv
             }
 
             return new ProfileFetcherResult(appId, ProfileFetcherResultTaskStatus.COMPLETE);
-
         } catch (Exception ex) {
             incrementFailureCount(instrumentationKey);
-            throw ex;
+            if ( ex instanceof WebClientResponseException ) {
+            	return new ProfileFetcherResult(null, ProfileFetcherResultTaskStatus.FAILED);
+            } else {
+            	throw ex;
+            }
         } finally {
             // remove task as we're done with it.
             this.tasks.remove(instrumentationKey);
         }
     }
 
-    void setHttpClient(CloseableHttpAsyncClient client) {
-        this.httpClient = client;
-    }
 
     /**
      * @deprecated Set endpoints using {@link TelemetryConfiguration#setConnectionString(String)}.
@@ -191,16 +195,26 @@ public class CdsProfileFetcher implements AppProfileFetcher, ApplicationIdResolv
             InternalLogger.INSTANCE.trace("%s endpoint override: %s", CdsProfileFetcher.class.getSimpleName(), this.endpointAddress);
         }
     }
+    
+    private String getEndpointUrl(String instrumentationKey, TelemetryConfiguration configuration) {
+    	if ( endpointAddress == null ) {
+    		return configuration.getEndpointProvider().getAppIdEndpointURL(instrumentationKey).toString();
+    	}
+    	return String.format(PROFILE_QUERY_ENDPOINT_APP_ID_FORMAT, this.endpointAddress, instrumentationKey);
+    }
 
-    private Future<HttpResponse> createFetchTask(String instrumentationKey, TelemetryConfiguration configuration) {
-        final HttpGet request;
-        if (endpointAddress == null) {
-            request = new HttpGet(configuration.getEndpointProvider().getAppIdEndpointURL(instrumentationKey));
-        } else {
-            request = new HttpGet(String.format(PROFILE_QUERY_ENDPOINT_APP_ID_FORMAT, this.endpointAddress, instrumentationKey));
-        }
-
-        return this.httpClient.execute(request, null);
+    private Future<String> createFetchTask(String endpoint) {
+    	CompletableFuture<String> future = new CompletableFuture<>();
+    	
+    	Mono<String> appId = WebClient.create(endpoint)
+    		.get()
+    		.exchange()
+    		.flatMap( mono -> mono.bodyToMono(String.class) )
+    		.doOnError( error -> future.completeExceptionally(error) );
+    	
+    	executorService.submit( () -> future.complete(appId.block()) );
+    	
+    	return future;
     }
 
     private void incrementFailureCount(String instrumentationKey) {
@@ -212,8 +226,12 @@ public class CdsProfileFetcher implements AppProfileFetcher, ApplicationIdResolv
 
     @Override
     public void close() throws IOException {
-        this.httpClient.close();
+    	tasks.values()
+    		.stream()
+    		.filter( future -> !future.isDone() )
+    		.forEach( future -> future.cancel(true) ); 
         this.taskThreadPool.stop(5, TimeUnit.SECONDS);
+        executorService.shutdownNow();
     }
 
     /**
@@ -225,6 +243,11 @@ public class CdsProfileFetcher implements AppProfileFetcher, ApplicationIdResolv
             tasks.clear();
             failureCounters.clear();
         }
+    }
+    
+    // visible for testing
+    void purgeNow() {
+    	new CachePurgingRunnable().run();
     }
 
     /**

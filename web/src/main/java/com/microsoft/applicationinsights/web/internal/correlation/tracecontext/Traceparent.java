@@ -2,8 +2,6 @@ package com.microsoft.applicationinsights.web.internal.correlation.tracecontext;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-import org.apache.http.annotation.Experimental;
-
 /**
  * This class represents the Traceparent data structure based on
  *
@@ -11,7 +9,7 @@ import org.apache.http.annotation.Experimental;
  * @author Dhaval Doshi
  * @see <a href="https://github.com/w3c/trace-context/blob/master/trace_context/HTTP_HEADER_FORMAT.md">Trace Context</a>
  */
-@Experimental
+// @Experimental
 public class Traceparent {
 
     /**

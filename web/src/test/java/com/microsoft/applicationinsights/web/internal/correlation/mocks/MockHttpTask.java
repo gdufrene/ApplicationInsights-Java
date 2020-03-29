@@ -21,23 +21,33 @@
 
 package com.microsoft.applicationinsights.web.internal.correlation.mocks;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import org.apache.http.HttpResponse;
 
-public class MockHttpTask implements Future<HttpResponse> {
+import org.apache.commons.io.Charsets;
+import org.springframework.http.HttpHeaders;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-    private HttpResponse response;
+public class MockHttpTask implements Future<String> {
+
+    private String response;
     private boolean failureOn;
     private boolean isDone;
+    private int statusCode = 200;
 
-    public MockHttpTask(HttpResponse response) {
-        this.response = response;
+    public MockHttpTask() {
+        // this.response = response;
         this.failureOn = false;
         this.isDone = false;
     }
+    
+    public void setResponse(String response) {
+		this.response = response;
+	}
 
     public void setFailureOn(boolean fail) {
         this.failureOn = fail;
@@ -63,22 +73,29 @@ public class MockHttpTask implements Future<HttpResponse> {
     }
 
     @Override
-    public HttpResponse get() throws InterruptedException, ExecutionException {
+    public String get() throws InterruptedException, ExecutionException {
         return doGet();
     }
 
     @Override
-    public HttpResponse get(long timeout, TimeUnit unit)
+    public String get(long timeout, TimeUnit unit)
             throws InterruptedException, ExecutionException, TimeoutException {
         return doGet();
     }
 
-    private HttpResponse doGet() throws ExecutionException {
+    private String doGet() throws ExecutionException {
         if (this.failureOn) {
             throw new ExecutionException("Failure", null);
+        }
+        if ( statusCode >= 400 ) {
+        	throw new WebClientResponseException(statusCode, "Error", new HttpHeaders(), new byte[]{}, StandardCharsets.UTF_8) ;
         }
 
         return this.response;
     }
+
+	public void setCode(int code) {
+		this.statusCode = code;
+	}
 
 }

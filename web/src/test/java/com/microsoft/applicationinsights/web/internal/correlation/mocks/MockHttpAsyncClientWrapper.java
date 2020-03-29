@@ -21,54 +21,47 @@
 
 package com.microsoft.applicationinsights.web.internal.correlation.mocks;
 
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.concurrent.FutureCallback;
-import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
+import java.util.concurrent.Future;
 
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import okhttp3.mockwebserver.MockWebServer;
 
 public class MockHttpAsyncClientWrapper {
 
-    private final CloseableHttpAsyncClient mockClient;
-    private final MockHttpEntity entity;
-    private final MockHttpResponse response;
-    private final MockHttpTask task;
+    // private final CloseableHttpAsyncClient mockClient;
+    private MockHttpTask task;
+    private String appId;
+    private boolean fail;
+    private boolean complete;
+    private int code = 200;
 
     public MockHttpAsyncClientWrapper() {
-
-        this.entity = new MockHttpEntity();
-        this.response = new MockHttpResponse(this.entity, 200);
-
-        this.task = new MockHttpTask(this.response);
-
-        this.mockClient = mock(CloseableHttpAsyncClient.class);
-
-        when(mockClient.execute(any(HttpUriRequest.class), any(FutureCallback.class))).thenReturn(this.task);
+    	this.task = new MockHttpTask();
     }
 
     public void setAppId(String appId) {
-        this.entity.setContent(appId);
+    	task.setResponse(appId);
     }
 
     public void setFailureOn(boolean fail) {
-        this.task.setFailureOn(fail);
+    	task.setFailureOn(fail);
     }
 
     public void setTaskAsComplete() {
-        this.task.setIsDone(true);
+    	task.setIsDone(true);
     }
 
     public void setTaskAsPending() {
-        this.task.setIsDone(false);
+        task.setIsDone(false);
     }
 
     public void setStatusCode(int code) {
-        this.response.setStatusCode(code);
+        task.setCode( code ); 
     }
 
-    public CloseableHttpAsyncClient getClient() {
-        return this.mockClient;
+    public Future<String> mockFuture(String endpoint) {
+    	return task;
+    }
+    
+    public void configureMockServer(MockWebServer server) {
     }
 }

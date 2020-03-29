@@ -5,8 +5,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.http.annotation.Experimental;
-
 /**
  * Class that represents Tracestate header based on
  *
@@ -16,7 +14,7 @@ import org.apache.http.annotation.Experimental;
  *
  * Implementations can add vendor specific details here.
  */
-@Experimental
+// @Experimental
 public class Tracestate {
 
     private static String KEY_WITHOUT_VENDOR_FORMAT = "[a-z][_0-9a-z\\-\\*\\/]{0,255}";
