@@ -14,6 +14,7 @@
 	    <module>collectd</module>
 	    <module>web</module>
 	    <module>web-auto</module>
+	    <module>azure-application-insights-spring-boot-starter</module>
 	</modules> 
         
 	<properties>

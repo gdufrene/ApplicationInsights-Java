@@ -21,24 +21,20 @@
 
 package com.microsoft.applicationinsights.autoconfigure;
 
-import com.microsoft.applicationinsights.internal.quickpulse.QuickPulse;
-import com.microsoft.applicationinsights.web.internal.WebRequestTrackingFilter;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.DispatcherServletAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.EmbeddedServletContainerAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.HttpMessageConvertersAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.ServerPropertiesAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.web.servlet.MockMvcAutoConfiguration;
+import org.springframework.boot.SpringBootConfiguration;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import com.microsoft.applicationinsights.internal.quickpulse.QuickPulse;
+import com.microsoft.applicationinsights.web.internal.WebRequestTrackingFilter;
 
 /**
  * @author Arthur Gavlyukovskiy
@@ -49,6 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
                 "spring.application.name: test-application",
                 "azure.application-insights.instrumentation-key: 00000000-0000-0000-0000-000000000000"
         },
+        /*
         classes = {
                 EmbeddedServletContainerAutoConfiguration.class,
                 ServerPropertiesAutoConfiguration.class,
@@ -60,8 +57,11 @@ import static org.assertj.core.api.Assertions.assertThat;
                 ApplicationInsightsTelemetryAutoConfiguration.class,
                 ApplicationInsightsWebMvcAutoConfiguration.class
         },
+        */
         webEnvironment = WebEnvironment.RANDOM_PORT
 )
+@SpringBootConfiguration
+@EnableAutoConfiguration
 @RunWith(SpringRunner.class)
 public class ApplicationInsightsWebMvcAutoConfigurationTests {
 

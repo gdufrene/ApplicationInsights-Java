@@ -23,6 +23,23 @@ package com.microsoft.applicationinsights.autoconfigure;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.Map;
+
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
+import org.springframework.boot.test.util.TestPropertyValues;
+// import org.springframework.boot.test.util.EnvironmentTestUtils;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Bean;
+
 import com.microsoft.applicationinsights.TelemetryClient;
 import com.microsoft.applicationinsights.TelemetryConfiguration;
 import com.microsoft.applicationinsights.channel.TelemetryChannel;
@@ -43,22 +60,6 @@ import com.microsoft.applicationinsights.telemetry.RequestTelemetry;
 import com.microsoft.applicationinsights.telemetry.Telemetry;
 import com.microsoft.applicationinsights.telemetry.TelemetryContext;
 import com.microsoft.applicationinsights.web.extensibility.modules.WebUserTrackingTelemetryModule;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.Map;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.beans.factory.UnsatisfiedDependencyException;
-import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
-import org.springframework.boot.test.util.EnvironmentTestUtils;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.annotation.Bean;
 
 /**
  * @author Arthur Gavlyukovskiy, Dhaval Doshi
@@ -82,8 +83,8 @@ public final class ApplicationInsightsTelemetryAutoConfigurationTests {
 
     @Test
     public void shouldSetInstrumentationKeyWhenContextLoads() {
-        EnvironmentTestUtils.addEnvironment(context,
-                "azure.application-insights.instrumentation-key:00000000-0000-0000-0000-000000000000");
+    	TestPropertyValues.of("azure.application-insights.instrumentation-key:00000000-0000-0000-0000-000000000000")
+    		.applyTo(context);
         context.register(PropertyPlaceholderAutoConfiguration.class,
                 ApplicationInsightsTelemetryAutoConfiguration.class);
         context.refresh();
@@ -109,8 +110,8 @@ public final class ApplicationInsightsTelemetryAutoConfigurationTests {
     @Test
     @Ignore("Boot 2 causes backport issues if depending on RelaxedPropertyBinder")
     public void shouldSetInstrumentationKeyFromRelaxedCase() {
-        EnvironmentTestUtils.addEnvironment(context,
-                "AZURE.APPLICATION_INSIGHTS.INSTRUMENTATION_KEY: 00000000-0000-0000-0000-000000000000");
+    	TestPropertyValues.of("AZURE.APPLICATION_INSIGHTS.INSTRUMENTATION_KEY: 00000000-0000-0000-0000-000000000000")
+    		.applyTo(context);
         context.register(PropertyPlaceholderAutoConfiguration.class,
                 ApplicationInsightsTelemetryAutoConfiguration.class);
         context.refresh();
@@ -131,8 +132,8 @@ public final class ApplicationInsightsTelemetryAutoConfigurationTests {
         myClient.trackEvent(eventTelemetry1);
         assertThat(eventTelemetry1.getTimestamp()).isNull();
 
-        EnvironmentTestUtils.addEnvironment(context,
-                "azure.application-insights.instrumentation-key: 00000000-0000-0000-0000-000000000000");
+        TestPropertyValues.of("azure.application-insights.instrumentation-key: 00000000-0000-0000-0000-000000000000")
+        	.applyTo(context);
         context.register(PropertyPlaceholderAutoConfiguration.class,
                 ApplicationInsightsTelemetryAutoConfiguration.class);
         context.refresh();
@@ -154,9 +155,10 @@ public final class ApplicationInsightsTelemetryAutoConfigurationTests {
 
     @Test
     public void shouldBeAbleToDisableInstrumentationByProperty() {
-        EnvironmentTestUtils.addEnvironment(context,
+    	TestPropertyValues.of(
                 "azure.application-insights.enabled: false",
-                "azure.application-insights.instrumentation-key: 00000000-0000-0000-0000-000000000000");
+                "azure.application-insights.instrumentation-key: 00000000-0000-0000-0000-000000000000")
+    		.applyTo(context);;
         context.register(PropertyPlaceholderAutoConfiguration.class,
                 ApplicationInsightsTelemetryAutoConfiguration.class);
         context.refresh();
@@ -167,11 +169,12 @@ public final class ApplicationInsightsTelemetryAutoConfigurationTests {
 
     @Test
     public void shouldBeAbleToConfigureInprocessTelemetryChannel() throws IllegalConfigurationException {
-        EnvironmentTestUtils.addEnvironment(context,
+    	TestPropertyValues.of(
                 "azure.application-insights.instrumentation-key: 00000000-0000-0000-0000-000000000000",
                 "azure.application-insights.channel.in-process.developer-mode=false",
                 "azure.application-insights.channel.in-process.flush-interval-in-seconds=123",
-                "azure.application-insights.channel.in-process.max-telemetry-buffer-capacity=10");
+                "azure.application-insights.channel.in-process.max-telemetry-buffer-capacity=10")
+    		.applyTo(context);
         context.register(PropertyPlaceholderAutoConfiguration.class,
                 ApplicationInsightsTelemetryAutoConfiguration.class);
         context.refresh();
@@ -187,11 +190,12 @@ public final class ApplicationInsightsTelemetryAutoConfigurationTests {
     
     @Test
     public void shouldBeAbleToConfigureSamplingTelemetryProcessor() {
-        EnvironmentTestUtils.addEnvironment(context,
+    	TestPropertyValues.of(
                 "azure.application-insights.instrumentation-key: 00000000-0000-0000-0000-000000000000",
                 "azure.application-insights.telemetry-processor.sampling.percentage=50",
                 "azure.application-insights.telemetry-processor.sampling.include=Request",
-            "azure.application-insights.telemetry-processor.sampling.enabled=true");
+            "azure.application-insights.telemetry-processor.sampling.enabled=true")
+    	.applyTo(context);
         context.register(PropertyPlaceholderAutoConfiguration.class,
                 ApplicationInsightsTelemetryAutoConfiguration.class);
         context.refresh();
@@ -207,9 +211,10 @@ public final class ApplicationInsightsTelemetryAutoConfigurationTests {
 
     @Test
     public void shouldBeAbleToDisableAllWebModules() {
-        EnvironmentTestUtils.addEnvironment(context,
+    	TestPropertyValues.of(
                 "azure.application-insights.instrumentation-key: 00000000-0000-0000-0000-000000000000",
-                "azure.application-insights.web.enabled=false");
+                "azure.application-insights.web.enabled=false")
+    		.applyTo(context);
         context.register(PropertyPlaceholderAutoConfiguration.class,
                 ApplicationInsightsTelemetryAutoConfiguration.class);
         context.refresh();
@@ -219,10 +224,11 @@ public final class ApplicationInsightsTelemetryAutoConfigurationTests {
 
     @Test
     public void internalLoggerShouldBeInitializedBeforeTelemetryConfiguration() {
-        EnvironmentTestUtils.addEnvironment(context,
+    	TestPropertyValues.of(
             "azure.application-insights.instrumentation-key: 00000000-0000-0000-0000-000000000000",
             "azure.application-insights.logger.level=INFO"
-            );
+            )
+    		.applyTo(context);
         context.register(PropertyPlaceholderAutoConfiguration.class,
             ApplicationInsightsTelemetryAutoConfiguration.class);
         context.refresh();
@@ -232,9 +238,10 @@ public final class ApplicationInsightsTelemetryAutoConfigurationTests {
 
     @Test
     public void shouldBeAbleToDisableDefaultModules() {
-        EnvironmentTestUtils.addEnvironment(context,
+    	TestPropertyValues.of(
                 "azure.application-insights.instrumentation-key: 00000000-0000-0000-0000-000000000000",
-                "azure.application-insights.default-modules.WebUserTrackingTelemetryModule.enabled=false");
+                "azure.application-insights.default-modules.WebUserTrackingTelemetryModule.enabled=false")
+    		.applyTo(context);
         context.register(PropertyPlaceholderAutoConfiguration.class,
                 ApplicationInsightsTelemetryAutoConfiguration.class);
         context.refresh();
@@ -244,8 +251,9 @@ public final class ApplicationInsightsTelemetryAutoConfigurationTests {
 
     @Test
     public void shouldBeAbleToAddCustomModules() {
-        EnvironmentTestUtils.addEnvironment(context,
-                "azure.application-insights.instrumentation-key: 00000000-0000-0000-0000-000000000000");
+    	TestPropertyValues.of(
+                "azure.application-insights.instrumentation-key: 00000000-0000-0000-0000-000000000000")
+    		.applyTo(context);
         context.register(PropertyPlaceholderAutoConfiguration.class,
                 ApplicationInsightsTelemetryAutoConfiguration.class,
                 CustomModuleConfiguration.class);
@@ -266,10 +274,11 @@ public final class ApplicationInsightsTelemetryAutoConfigurationTests {
 
     @Test
     public void shouldBeAbleToConfigureJmxPerformanceCounters() throws Exception{
-        EnvironmentTestUtils.addEnvironment(context,
+    	TestPropertyValues.of(
             "azure.application-insights.instrumentation-key: 00000000-0000-0000-0000-000000000000",
             "azure.application-insights.jmx.jmx-counters:"
-                + "java.lang:type=ClassLoading/LoadedClassCount/Current Loaded Class Count");
+                + "java.lang:type=ClassLoading/LoadedClassCount/Current Loaded Class Count")
+    		.applyTo(context);
         context.register(PropertyPlaceholderAutoConfiguration.class,
             ApplicationInsightsTelemetryAutoConfiguration.class);
         context.refresh();
@@ -283,9 +292,10 @@ public final class ApplicationInsightsTelemetryAutoConfigurationTests {
 
     @Test
     public void shouldBeAbleToConfigureJvmPerformanceCounters() {
-        EnvironmentTestUtils.addEnvironment(context,
+    	TestPropertyValues.of(
             "azure.application-insights.instrumentation-key: 00000000-0000-0000-0000-000000000000",
-            "azure.application-insights.default.modules.JvmPerformanceCountersModule.enabled=true");
+            "azure.application-insights.default.modules.JvmPerformanceCountersModule.enabled=true")
+    		.applyTo(context);
         context.register(PropertyPlaceholderAutoConfiguration.class,
             ApplicationInsightsTelemetryAutoConfiguration.class);
         context.refresh();
@@ -295,9 +305,10 @@ public final class ApplicationInsightsTelemetryAutoConfigurationTests {
 
     @Test
     public void heartBeatModuleShouldBeEnabledByDefault() {
-        EnvironmentTestUtils.addEnvironment(context,
+    	TestPropertyValues.of(
             "azure.application-insights.instrumentation-key: 00000000-0000-0000-0000-000000000000",
-            "azure.application-insights.heart-beat.enabled=true");
+            "azure.application-insights.heart-beat.enabled=true")
+    		.applyTo(context);
         context.register(PropertyPlaceholderAutoConfiguration.class,
             ApplicationInsightsTelemetryAutoConfiguration.class);
         context.refresh();
