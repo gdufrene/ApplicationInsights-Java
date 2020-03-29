@@ -13,6 +13,7 @@
 	    <module>core</module>
 	    <module>collectd</module>
 	    <module>web</module>
+	    <module>web-auto</module>
 	</modules> 
         
 	<properties>
